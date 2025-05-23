@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="styles.css">
+  <title>Document</title>
+</head>
+<body>
+  <div class="container">
+    <div class="modal-overlay" id="modalOverlay">
+      <div class="pawn-transform" id="pawnTransform">
+        <div class="figure-images">
+          <div class="image-container" style="width: 80px; height: 80px; overflow: hidden;">
+            <img class="transformimg"  src="img/black/blackBishop.png"  alt="" srcset="" height="88px">
+          </div>
+          <div class="image-container" style="width: 80px; height: 80px; overflow: hidden;">
+            <img class="transformimg" src="img/black/blackHorse.png"  alt="" srcset="">
+          </div>
+          <div class="image-container" style="width: 80px; height: 80px; overflow: hidden;">
+            <img class="transformimg" src="img/black/blackRook.png"  alt="" srcset="" height="85px">
+          </div>
+          <div class="image-container" style="width: 80px; height: 80px; overflow: hidden;">
+            <img class="transformimg" src="img/black/blackQueen.png"  alt="" srcset="">
+          </div>
+        </div>
+        <div class="figure-inputs">
+          <input type="radio" checked name="figure" class="figure-input" value="Bishop">
+          <input type="radio" name="figure" class="figure-input" value="Horse">
+          <input type="radio" name="figure" class="figure-input" value="Rook">
+          <input type="radio" name="figure" class="figure-input" value="Queen">
+        </div>
+        <button id="closeButton">Выбрать</button>
+      </div>
+    </div>
+    <h1 id="turn-status">Ход белых</h1>
+    <div class="table">
+      <!-- <div class="row light-brown-start" id="_3"><div class="cube light-brown-cube"></div><div class="cube highlight-green brown-cube"></div><div class="cube light-brown-cube"></div><div class="cube brown-cube"></div><div class="cube light-brown-cube"></div><div class="cube brown-cube"></div><div class="cube light-brown-cube"></div><div class="cube brown-cube"></div></div> -->
+    </div>
+  </div>
+</body>
+<script src="create-script.js"></script>
+<script src="action.js"></script>
+<script src="clear-action.js"></script>
+</html>
