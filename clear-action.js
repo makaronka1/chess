@@ -67,7 +67,6 @@ function targetCell(event) {
   if (figuresTypes.includes(target.classList.item(1)) && !target.parentElement.classList.contains('highlight-red') && color == moveTurn) {
     selectedFigure = target;
     removeHighlightedSquares();
-    //searchAvailableSquares(target);
     highlightAvailableSquare(searchAllAvailableSquares(target));
 
     isCastling(target);
@@ -95,7 +94,6 @@ function targetCell(event) {
     pawnTransform(target);
     figureEat(target);
     turnSwap();
-    //removeHighlightedCheck();
     check();
     checkMate();
 
@@ -179,116 +177,6 @@ function turnSwap () {
     turnStatus.textContent = 'Ход белых';
   }
 }
-
-/*function searchAvailableSquares (target) {
-	const eventTargetSquare = target.parentElement;
-	const eventTargetRow = eventTargetSquare.parentElement;
-	const figureRowId = eventTargetRow.id;
-	const squareIndex = Array.from(eventTargetRow.children).indexOf(eventTargetSquare);
-	const clearFigureRowId = figureRowId.slice(1);
-	const targetFigureType = target.classList.item(1);
-	const targetFigureColor = target.classList.item(0);
-  const opColor = targetFigureColor == 'white' ? 'black' : 'white';
-  let directions;
-  
-  directions = targetFigureType == 'king' || targetFigureType == 'queen' ? queenKingDirections
-   : targetFigureType == 'bishop' ? bishopDirections 
-   : targetFigureType == 'rook' ? rookDirections
-   : targetFigureType == 'horse' ? horseDirections
-   : false;
-    if (targetFigureType != 'pawn'){
-    directions.forEach(direction =>  {
-      let step = 1;
-
-      while (true) {
-        let newX = parseInt(squareIndex) + parseInt(direction.x * step);
-        let newY = parseInt(clearFigureRowId) + parseInt(direction.y * step);
-
-        if (newY > 7 || newY < 0 || newX > 7 || newX < 0) {
-          break;
-        }
-
-        let newRow = document.querySelector(`#_${newY}`);
-
-        if (!newRow) break;
-        let newSquare = newRow.children[newX];
-        
-        if (!newSquare) break;
-
-        if (!newSquare.hasChildNodes()) {
-          if (targetFigureType == 'king' && isUnderAttack(opColor, newSquare)) {
-            break;
-          } else if (targetFigureType == 'king' && !isUnderAttack(opColor, newSquare)){
-            console.log(!isUnderAttack(opColor, newSquare));
-            newSquare.classList.add('highlight-green');
-            break;
-          } else if (targetFigureType == 'horse') {
-            newSquare.classList.add('highlight-green');
-            break;
-          } else {
-            step++;
-            newSquare.classList.add('highlight-green');
-          }
-        } else if (newSquare.hasChildNodes() && newSquare.children[0].classList.item(0) != targetFigureColor) {
-          if (targetFigureType == 'king' && !isUnderAttack(opColor, newSquare)){
-            newSquare.classList.add('highlight-red');
-            break;
-          } else {
-            newSquare.classList.add('highlight-red');
-            break;
-          }
-        } else {
-          break;
-        }
-      }
-    });
-  } else if (targetFigureType === 'pawn') {
-
-		const isWhite = targetFigureColor === 'white';
-    const enpassant = isWhite ? 'enpassant-' + 'black' : 'enpassant-' + 'white';
-		const direction = isWhite ? -1 : 1;
-		const targetRow = document.querySelector(`#_${parseInt(clearFigureRowId) + (1 * direction)}`);
-
-		if (!targetRow) return;
-
-		if (squareIndex > 0) {
-			const targetLeftSquare = targetRow.children[squareIndex - 1];
-			if ((targetLeftSquare && canEat(targetLeftSquare, targetFigureColor)) || targetLeftSquare.classList.contains(enpassant)) {
-					targetLeftSquare.classList.add('highlight-red');
-			}
-		}
-
-		if (squareIndex < 7) {
-			const targetRightSquare = targetRow.children[squareIndex + 1];
-			if ((targetRightSquare && canEat(targetRightSquare, targetFigureColor)) || targetRightSquare.classList.contains(enpassant)) {
-					targetRightSquare.classList.add('highlight-red');
-			}
-		}
-
-    const startRow = isWhite ? 6 : 1;
-    const stepsNumber = clearFigureRowId == startRow ? 2 : 1;
-
-    for (let i = 1; i <= stepsNumber; i++) {
-      try {
-          const targetRow = document.querySelector(`#_${parseInt(clearFigureRowId) + (i * direction)}`);
-          const targetSquare = targetRow.children[squareIndex];
-
-          if (targetSquare.hasChildNodes()) {
-              break;
-          } else {
-						targetSquare.classList.add('highlight-green');
-					}
-      } catch {
-          console.log('Ход невозможен');
-      }
-    }
-
-  }
-    else {
-    console.log('Такой фигуры нет');
-  }
-  
-}*/
 
 function highlightAvailableSquare (squares) {
   for (const square of squares[0]) {
