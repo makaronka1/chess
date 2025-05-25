@@ -383,24 +383,6 @@ function removeHighlightedCheck () {
   }
 }
 
-function removeAvailableSquares () {
-	let availableMoveSquares = document.querySelectorAll('.move-available');
-  let availableEatSquares = document.querySelectorAll('.eat-available');
-  let protectedSquares = document.querySelectorAll('.protected');
-
-  
-    for (let square of availableMoveSquares) {
-      square.classList.remove('move-available');
-    }
-  
-    for (let square of availableEatSquares) {
-      square.classList.remove('eat-available');
-    }
-
-    for (let square of protectedSquares) {
-      square.classList.remove('protected');
-    }
-}
 
 function isCastling(target) {
   const {type, color, opColor, row} = figureInfo(target);
