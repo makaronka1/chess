@@ -68,7 +68,6 @@ function targetCell(event) {
     selectedFigure = target;
     removeHighlightedSquares();
     highlightAvailableSquare(searchAllAvailableSquares(target));
-
     isCastling(target);
     return; 
   }
@@ -96,7 +95,7 @@ function targetCell(event) {
     turnSwap();
     check();
     checkMate();
-
+    removeHighlightedCheck();
     return;
   }
 }
@@ -190,7 +189,9 @@ function highlightAvailableSquare (squares) {
 }
 
 function searchAllAvailableSquares (target) {
-  target.classList.add('highlight-blue');
+  if (moveTurn == 'black' || moveTurn == 'white') {
+    target.classList.add('highlight-blue');
+  }
   const {square, row, rowId, squareIndex, type, color, opColor} = figureInfo(target);
   let directions;
   let squares = [[], []];
@@ -237,7 +238,7 @@ function searchAllAvailableSquares (target) {
           } else {
             step++;
           }
-        } else if (newSquare.hasChildNodes() && newSquare.children[0].classList.item(0) == opColor) {
+        } else if (newSquare.hasChildNodes() && canEat(newSquare, color)) {
           if (type == 'king' && !isUnderAttack(opColor ,newSquare) ) {
             squares[1].push(newSquare);
             break;
@@ -333,8 +334,6 @@ function figureMoove (targetSquare) {
         const squareIndex = Array.from(row.children).indexOf(selectedFigure.parentElement);
         const square = startRow.children[squareIndex];
         square.classList.add('enpassant-white');
-      } else {
-        console.log('Взятие на проходе не работает');
       }
     }
   }
@@ -482,7 +481,7 @@ function isUnderAttack(color, square) {
         } else if (newSquare.hasChildNodes() && newSquare.children[0].classList.item(0) == color){
           allProtectedSquares.push(newSquare);
           break;
-        } else if (newSquare.hasChildNodes() && newSquare.children[0].classList.item(0) != color) {
+        } else if (newSquare.hasChildNodes() && canEat(newSquare, color)) {
           allAttackSquares.push(newSquare);
           break;
         } else {
@@ -507,7 +506,7 @@ function isUnderAttack(color, square) {
 
       if (!newSquare.hasChildNodes()) {
         allMoveSquares.push(newSquare);
-      } else if (newSquare.hasChildNodes() && newSquare.children[0].classList.item(0) != color) {
+      } else if (newSquare.hasChildNodes() && canEat(newSquare, color)) {
         allAttackSquares.push(newSquare);
         return;
       } else if (newSquare.hasChildNodes() && newSquare.children[0].classList.item(0) == color){
@@ -541,7 +540,6 @@ function isUnderAttack(color, square) {
 				allAttackSquares.push(targetRightSquare);
 			} else {
         allProtectedSquares.push(targetRightSquare);
-
       }
 		}
 
@@ -556,7 +554,6 @@ function isUnderAttack(color, square) {
     isAttacked = true;
   }
 
-  removeAvailableSquares();
   return isAttacked;
 }
 
@@ -571,10 +568,7 @@ function nextTurnSimulate (figure, square, action) {
     figure.classList.add('phantom');
     square.appendChild(clone);
     const king = findKing(color);
-    console.log(king, king[2].parentElement);
     result = !isUnderAttack(opColor, king[2].parentElement);
-    console.log(square);
-    console.log(result);
     square.removeChild(square.firstChild);
   } else if (action == 'eat' && type != 'king') {
     const king = findKing(color);
@@ -632,7 +626,6 @@ function hideModal() {
   const selectedRadio = document.querySelector('input[name="figure"]:checked');  
   const selectedFigureType = selectedRadio.value;
 
-
   let figure = document.createElement('img');
   figure.setAttribute('src', `img/${selectedTransformFigureColor}/${selectedTransformFigureColor}${selectedFigureType}.png`);
   figure.classList.add(`${selectedTransformFigureColor}`, `${selectedFigureType.toLowerCase()}`);
@@ -664,7 +657,6 @@ function checkMate () {
   for (const figure of allFigures) {
     const squares = searchAllAvailableSquares(figure);
     document.querySelector('.highlight-blue').classList.remove('highlight-blue');
-    console.log(squares[0], squares[1]);
     if (squares[0].length != 0 || squares[1].length != 0) {
       console.log(squares[0].length, squares[1].length);
       result = true;
@@ -675,7 +667,7 @@ function checkMate () {
     turnStatus.textContent = 'Мат. Игра окончена.';
     alert(`Игра окончена. Победа ${opColor}`);
   }, 250);
-  turnStatus = 'game-over';
+  turnStatus.textContent = 'game-over';
   return result;
 }
 confirmButton.addEventListener('click', hideModal);
