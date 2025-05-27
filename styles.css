@@ -112,4 +112,42 @@ h1 {
 .table {
   display: flex;
   flex-direction: column;
+  border: 5px solid white;
+}
+
+.letter-container {
+  display: flex;
+  flex-direction: column-reverse;
+}
+
+.letter-list__item {
+  list-style: none;
+  font-size: 32px;
+}
+
+.letter-list {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+  width: 100%;
+}
+
+.number-container {
+  display: flex;
+  flex-direction: row;
+  gap: 15px;
+}
+
+.number-list__item {
+  list-style: none;
+  font-size: 32px;
+}
+
+.number-list {
+  justify-content: space-around;
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  max-height: 650px;
 }
