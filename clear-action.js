@@ -18,7 +18,7 @@ const queenKingDirections = [
     { x: 1, y: 0},
     { x: -1, y: 0},
     ];
-  const horseDirections = [
+const horseDirections = [
     { x: 2, y: 1 },
     { x: -2,  y: 1 },
     { x: 1,  y: 2 },
@@ -28,18 +28,25 @@ const queenKingDirections = [
     { x: 1,  y: -2 },
     { x: -1,  y: -2 }
     ];
-  const bishopDirections = [
+const bishopDirections = [
     { x: 1,  y: 1 },
     { x: 1, y: -1 },
     { x: -1,  y: 1 },
     { x: -1,  y: -1 }
     ];
-  const rookDirections = [
+const rookDirections = [
     { x: 0, y: 1},
     { x: 0, y: -1},
     { x: 1, y: 0},
     { x: -1, y: 0},
     ];
+const blackPawnDirection = [
+    { x: 0, y: 1}
+    ];
+const whitePawnDirection = [
+    { x: 0, y: -1}
+    ];
+
 function targetCell(event) {
   const target = event.target;
   const color = target.classList.item(0);
@@ -67,6 +74,7 @@ function targetCell(event) {
   if (figuresTypes.includes(target.classList.item(1)) && !target.parentElement.classList.contains('highlight-red') && color == moveTurn) {
     selectedFigure = target;
     removeHighlightedSquares();
+    highlightSelectedFigure(target);
     highlightAvailableSquare(searchAllAvailableSquares(target));
     isCastling(target);
     return; 
@@ -93,9 +101,9 @@ function targetCell(event) {
     pawnTransform(target);
     figureEat(target);
     turnSwap();
+    removeHighlightedCheck();
     check();
     checkMate();
-    removeHighlightedCheck();
     return;
   }
 }
@@ -151,8 +159,6 @@ function enpassant (targetSquare) {
     whitePawnRow.children[squareIndex].removeChild(whitePawnRow.children[squareIndex].firstChild);
   } else {
     const blackPawnRow = document.querySelector('#_3');
-    console.log(blackPawnRow.children[squareIndex]);
-    console.log(blackPawnRow);
     blackPawnRow.children[squareIndex].removeChild(blackPawnRow.children[squareIndex].firstChild);
   }
 }
@@ -188,10 +194,11 @@ function highlightAvailableSquare (squares) {
   }
 }
 
+function highlightSelectedFigure (target) {
+  target.classList.add('highlight-blue');
+}
+
 function searchAllAvailableSquares (target) {
-  if (moveTurn == 'black' || moveTurn == 'white') {
-    target.classList.add('highlight-blue');
-  }
   const {square, row, rowId, squareIndex, type, color, opColor} = figureInfo(target);
   let directions;
   let squares = [[], []];
@@ -227,10 +234,10 @@ function searchAllAvailableSquares (target) {
               break;
             } else if (type == 'horse' && nextTurnSimulate(target, newSquare, 'move')) {
               squares[0].push(newSquare);
+              break;
             } else {
               break;
             }
-            break;
           } else if (nextTurnSimulate(target, newSquare, 'move')) {
             console.log(newSquare);
             step++;
@@ -656,7 +663,6 @@ function checkMate () {
 
   for (const figure of allFigures) {
     const squares = searchAllAvailableSquares(figure);
-    document.querySelector('.highlight-blue').classList.remove('highlight-blue');
     if (squares[0].length != 0 || squares[1].length != 0) {
       console.log(squares[0].length, squares[1].length);
       result = true;
