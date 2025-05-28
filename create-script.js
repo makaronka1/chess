@@ -82,15 +82,27 @@ function fillPawn () {
 
   let blackPawnSquares = blackPawnRow.children;
   let whitePawnSquares = whitePawnRow.children;
-  
+  let i = 0;
   for (let square of blackPawnSquares) {
     let blackPawnImg = createFigure('black', 'Pawn');
     square.appendChild(blackPawnImg);
+    virtualBoard[blackPawnRow.id.slice(1)][i] = {
+      color: 'black',
+      type: 'pawn',
+      isMove: false
+    };
+    i++;
   }
-
+  i = 0;
   for (let square of whitePawnSquares) {
     let whitePawnImg = createFigure('white', 'Pawn');
     square.appendChild(whitePawnImg);
+    virtualBoard[whitePawnRow.id.slice(1)][i] = {
+      color: 'white',
+      type: 'pawn',
+      isMove: false
+    };
+    i++;
   }
 }
 
@@ -105,7 +117,18 @@ function fillHorse () {
       const whiteHorseImg = createFigure('white', 'Horse');
 
       blackHorseSquares[i].appendChild(blackHorseImg);
+      virtualBoard[lastRow.id.slice(1)][i] = {
+        color: 'white',
+        type: 'horse',
+        isMove: false
+      };
       whiteHorseSquares[i].appendChild(whiteHorseImg);
+      virtualBoard[firstRow.id.slice(1)][i] = {
+        color: 'black',
+        type: 'horse',
+        isMove: false
+      };
+      
     }
   }
 }
@@ -117,9 +140,19 @@ function fillBishop () {
   for (let i = 0; i < 2; i++) {
     let blackBishopImg = createFigure('black', 'Bishop');
     let whiteBishopImg = createFigure('white', 'Bishop');
-
+    let index = i == 0 ? 2 : 5;
     blackBishopSquares[i].appendChild(blackBishopImg);
+    virtualBoard[firstRow.id.slice(1)][index] = {
+        color: 'black',
+        type: 'bishop',
+        isMove: false
+    };
     whiteBishopSquares[i].appendChild(whiteBishopImg);
+    virtualBoard[lastRow.id.slice(1)][index] = {
+      color: 'white',
+      type: 'bishop',
+      isMove: false
+    };
   }
 }
 
@@ -132,8 +165,18 @@ function fillKing () {
 
   blackKingImg.setAttribute('src', 'img/black/blackKing.png');
   blackKingImg.classList.add('black', 'king', 'not-go');
+  virtualBoard[firstRow.id.slice(1)][4] = {
+    color: 'black',
+    type: 'king',
+    isMove: false
+  };
   whiteKingImg.setAttribute('src', 'img/white/whiteKing.png');
   whiteKingImg.classList.add('white', 'king', 'not-go');
+  virtualBoard[lastRow.id.slice(1)][4] = {
+    color: 'white',
+    type: 'king',
+    isMove: false
+  };
 
   blackKingSquare.appendChild(blackKingImg);
   whiteKingSquare.appendChild(whiteKingImg);
@@ -144,7 +187,17 @@ function fillQueen () {
   let whiteQueenSquare = lastRow.children[3];
 
   let blackQueenImg = createFigure('black', 'Queen');
+  virtualBoard[firstRow.id.slice(1)][3] = {
+    color: 'black',
+    type: 'queen',
+    isMove: false
+  };
   let whiteQueenImg = createFigure('white', 'Queen');
+  virtualBoard[lastRow.id.slice(1)][3] = {
+    color: 'white',
+    type: 'queen',
+    isMove: false
+  };
 
   blackQueenSquare.appendChild(blackQueenImg);
   whiteQueenSquare.appendChild(whiteQueenImg);
@@ -157,10 +210,21 @@ function fillRook () {
   for (let i = 0; i < 2; i++) {
     let blackRookImg = createFigure('black', 'Rook');
     let whiteRookImg = createFigure('white', 'Rook');
+    let index = i == 0 ? 0 : 7;
     blackRookImg.classList.add('not-go');
     whiteRookImg.classList.add('not-go');
     blackRookSquares[i].appendChild(blackRookImg);
+    virtualBoard[firstRow.id.slice(1)][index] = {
+      color: 'black',
+      type: 'rook',
+      isMove: false
+    };
     whiteRookSquares[i].appendChild(whiteRookImg);
+    virtualBoard[lastRow.id.slice(1)][index] = {
+      color: 'white',
+      type: 'rook',
+      isMove: false
+    };
   }
 }
 

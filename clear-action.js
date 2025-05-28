@@ -47,7 +47,7 @@ const whitePawnDirection = [
     { x: 0, y: -1}
     ];
 
-function targetCell(event) {
+/*function targetCell(event) {
   const target = event.target;
   const color = target.classList.item(0);
 
@@ -106,7 +106,7 @@ function targetCell(event) {
     checkMate();
     return;
   }
-}
+}*/
 
 function figureInfo(target) {
 
@@ -194,8 +194,10 @@ function highlightAvailableSquare (squares) {
   }
 }
 
-function highlightSelectedFigure (target) {
-  target.classList.add('highlight-blue');
+function highlightSelectedFigure (coord) {
+  const {x, y} = coord;
+  const row = document.querySelector(`#_${y}`);
+  row.children[x].classList.add('highlight-blue');
 }
 
 function searchAllAvailableSquares (target) {
@@ -677,4 +679,4 @@ function checkMate () {
   return result;
 }
 confirmButton.addEventListener('click', hideModal);
-table.addEventListener('click', targetCell);
+//table.addEventListener('click', targetCell);
