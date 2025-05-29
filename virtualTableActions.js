@@ -13,13 +13,21 @@ function targetCell(event) {
     square = target.parentElement;
   }
   const {x, y} = squareInfo(square); 
-  console.log(x, y);
   if (virtualBoard[y][x] != null) {
     const figure = virtualBoard[y][x];
+    console.log(figure.color == moveTurn);
     if (figure.color == moveTurn) {
+	    removeHighlightedSquares();
       highlightSelectedFigure(squareInfo(square));
+      const moveSquares = searchMoveAvailable(squareInfo(square));
+      const eatSquares = searchEatAvailable(squareInfo(square));
+      highlightAvailableMoveSquares(moveSquares);
+      highlightAvailableEatSquares(eatSquares);
+    } else {
+  	removeHighlightedSquares();
     }
-    console.log(virtualBoard[y][x]);
+  } else if (virtualBoard[y][x] == null) {
+  	removeHighlightedSquares();
   }
 }
 table.addEventListener('click', targetCell);
@@ -37,8 +45,27 @@ function squareInfo (square) {
   };
 }
 
-function searchMoveAvailable (target) {
-  const {square, row, rowId, squareIndex, type, color, opColor} = figureInfo(target);
+function highlightAvailableMoveSquares (squares) {
+  for (const square of squares) {
+    const {x, y} = square;
+    let squareForHighlight = document.querySelector(`#_${y}`).children[x];
+    squareForHighlight.classList.add('highlight-green');
+  }
+}
+
+function highlightAvailableEatSquares (squares) {
+  for (const square of squares) {
+    const {x, y} = square;
+    let squareForHighlight = document.querySelector(`#_${y}`).children[x];
+    squareForHighlight.classList.add('highlight-red');
+  }
+}
+
+function searchMoveAvailable (coord) {
+  const {x, y} = coord;
+  console.log(coord);
+  console.log(virtualBoard[y][x]);
+  const {color, type, isMove} = virtualBoard[y][x];
   let directions;
   let squares = [];
   directions = type == 'king' || type == 'queen' ? queenKingDirections
@@ -53,8 +80,8 @@ function searchMoveAvailable (target) {
       let step = 1;
 
       while (true) {
-        let newX = parseInt(squareIndex) + parseInt(direction.x * step);
-        let newY = parseInt(rowId) + parseInt(direction.y * step);
+        let newX = parseInt(x) + parseInt(direction.x * step);
+        let newY = parseInt(y) + parseInt(direction.y * step);
         if (newY > 7 || newY < 0 || newX > 7 || newX < 0) {
           break;
         }
@@ -77,7 +104,7 @@ function searchMoveAvailable (target) {
             }
           } else if (type == 'pawn') {
             const startRow = directions == blackPawnDirection ? 1 : 6;
-            if (startRow == rowId && step < 2) {
+            if (startRow == y && step < 2) {
               squares.push({x: newX, y: newY});
               step++;
             } else {
@@ -97,8 +124,9 @@ function searchMoveAvailable (target) {
   return squares;
 }
 
-function searchEatAvailable (target) {
-  const {square, row, rowId, squareIndex, type, color, opColor} = figureInfo(target);
+function searchEatAvailable (coord) {
+  const {x, y} = coord;
+  const {color, type, isMove} = virtualBoard[y][x];
   let directions;
   let squares = [];
   directions = type == 'king' || type == 'queen' ? queenKingDirections
@@ -113,8 +141,8 @@ function searchEatAvailable (target) {
       let step = 1;
 
       while (true) {
-        let newX = parseInt(squareIndex) + parseInt(direction.x * step);
-        let newY = parseInt(rowId) + parseInt(direction.y * step);
+        let newX = parseInt(x) + parseInt(direction.x * step);
+        let newY = parseInt(y) + parseInt(direction.y * step);
         if (newY > 7 || newY < 0 || newX > 7 || newX < 0) {
           break;
         }
@@ -130,11 +158,18 @@ function searchEatAvailable (target) {
           } else {
             step++;
           }
-        } else if (newSquare != null && type != 'pawn') {
-
+        } else if (newSquare != null && type != 'pawn' && canEat(newSquare, color)) {
+          squares.push({x: newX, y: newY});
+          break;
+        } else if (newSquare != null && type != 'pawn' && !canEat(newSquare, color)) {
+          break;
         }
       }
-     });
+    });
 
   return squares;
+}
+
+function canEat(square, attackerColor) {
+	return square.color !== attackerColor;
 }
