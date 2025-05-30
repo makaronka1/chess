@@ -183,16 +183,16 @@ function turnSwap () {
   }
 }
 
-function highlightAvailableSquare (squares) {
-  for (const square of squares[0]) {
-    if (square != undefined) {
-      square.classList.add('highlight-green');
-    }
-  }
-  for (const square of squares[1]) {
-    square.classList.add('highlight-red');
-  }
-}
+// function highlightAvailableSquare (squares) {
+//   for (const square of squares[0]) {
+//     if (square != undefined) {
+//       square.classList.add('highlight-green');
+//     }
+//   }
+//   for (const square of squares[1]) {
+//     square.classList.add('highlight-red');
+//   }
+// }
 
 function highlightSelectedFigure (coord) {
   const {x, y} = coord;
@@ -200,7 +200,7 @@ function highlightSelectedFigure (coord) {
   row.children[x].classList.add('highlight-blue');
 }
 
-function searchAllAvailableSquares (target) {
+/*function searchAllAvailableSquares (target) {
   const {square, row, rowId, squareIndex, type, color, opColor} = figureInfo(target);
   let directions;
   let squares = [[], []];
@@ -317,43 +317,43 @@ function searchAllAvailableSquares (target) {
   }
   console.log(squares);
   return squares;
-}
+}*/
 
-function canEat(square, attackerColor) {
-	if (!square.hasChildNodes()) return false;
+// function canEat(square, attackerColor) {
+// 	if (!square.hasChildNodes()) return false;
 	
-	const figure = square.firstChild;
-	const defenderColor = figure.classList.item(0);
+// 	const figure = square.firstChild;
+// 	const defenderColor = figure.classList.item(0);
 	
-	return defenderColor !== attackerColor;
-}
+// 	return defenderColor !== attackerColor;
+// }
 
-function figureMoove (targetSquare) {
-  const {square, row, color, type} = figureInfo(selectedFigure);
-  if (type == 'pawn'){
-    if (row.id == '_1' || row.id == '_6') {
-      const targetSquareRowId = targetSquare.parentElement.id;
-      if (selectedFigure.classList.contains('black') && targetSquareRowId == '_3') {
-        const startRow = document.querySelector('#_2');
-        const squareIndex = Array.from(row.children).indexOf(selectedFigure.parentElement);
-        const square = startRow.children[squareIndex];
-        square.classList.add('enpassant-black');
-      } else if (selectedFigure.classList.contains('white') && targetSquareRowId == '_4') {
-        const startRow = document.querySelector('#_5');
-        const squareIndex = Array.from(row.children).indexOf(selectedFigure.parentElement);
-        const square = startRow.children[squareIndex];
-        square.classList.add('enpassant-white');
-      }
-    }
-  }
-	targetSquare.appendChild(selectedFigure);
-  try {
-    selectedFigure.classList.remove('not-go');
-  } catch {
-    console.log('Фигура уже двигалась');
-  }
-	removeHighlightedSquares();
-}
+// function figureMoove (targetSquare) {
+//   const {square, row, color, type} = figureInfo(selectedFigure);
+//   if (type == 'pawn'){
+//     if (row.id == '_1' || row.id == '_6') {
+//       const targetSquareRowId = targetSquare.parentElement.id;
+//       if (selectedFigure.classList.contains('black') && targetSquareRowId == '_3') {
+//         const startRow = document.querySelector('#_2');
+//         const squareIndex = Array.from(row.children).indexOf(selectedFigure.parentElement);
+//         const square = startRow.children[squareIndex];
+//         square.classList.add('enpassant-black');
+//       } else if (selectedFigure.classList.contains('white') && targetSquareRowId == '_4') {
+//         const startRow = document.querySelector('#_5');
+//         const squareIndex = Array.from(row.children).indexOf(selectedFigure.parentElement);
+//         const square = startRow.children[squareIndex];
+//         square.classList.add('enpassant-white');
+//       }
+//     }
+//   }
+// 	targetSquare.appendChild(selectedFigure);
+//   try {
+//     selectedFigure.classList.remove('not-go');
+//   } catch {
+//     console.log('Фигура уже двигалась');
+//   }
+// 	removeHighlightedSquares();
+// }
 
 function figureEat(target) {
 	let targetParent = target.parentElement;
@@ -677,6 +677,21 @@ function checkMate () {
   }, 250);
   turnStatus.textContent = 'game-over';
   return result;
+}
+
+function imageMove (startCoord, endCoord, flag = 'move') {
+  const imageStartRow = document.querySelector(`#_${startCoord.y}`);
+
+  const imageStartSquare = imageStartRow.children[startCoord.x];
+  const startImage = imageStartSquare.children[0];
+
+  const imageEndRow = document.querySelector(`#_${endCoord.y}`);
+  const imageEndSquare = imageEndRow.children[endCoord.x];
+  if (flag == 'eat') {
+    imageEndSquare.removeChild(imageEndSquare.firstChild);
+  }
+
+  imageEndSquare.appendChild(startImage);
 }
 confirmButton.addEventListener('click', hideModal);
 //table.addEventListener('click', targetCell);

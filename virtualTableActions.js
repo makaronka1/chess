@@ -12,22 +12,47 @@ function targetCell(event) {
   } else {
     square = target.parentElement;
   }
-  const {x, y} = squareInfo(square); 
+  const {x, y} = squareInfo(square);
+  //Если нажата на клетку с фигурой которая может ходить (её ход) 
   if (virtualBoard[y][x] != null) {
     const figure = virtualBoard[y][x];
-    console.log(figure.color == moveTurn);
     if (figure.color == moveTurn) {
 	    removeHighlightedSquares();
-      highlightSelectedFigure(squareInfo(square));
-      const moveSquares = searchMoveAvailable(squareInfo(square));
-      const eatSquares = searchEatAvailable(squareInfo(square));
+      const squareCoord = squareInfo(square);
+      selectedFigure = squareCoord;
+      highlightSelectedFigure(squareCoord);
+      const moveSquares = searchMoveAvailable(squareCoord);
+      const eatSquares = searchEatAvailable(squareCoord);
       highlightAvailableMoveSquares(moveSquares);
       highlightAvailableEatSquares(eatSquares);
     } else {
   	removeHighlightedSquares();
     }
-  } else if (virtualBoard[y][x] == null) {
+  }
+
+  //Если нажатие на клетку с которой нельзя взаимодействовать 
+  if (virtualActionBoard[y][x] == null && virtualBoard[y][x] == null) {
   	removeHighlightedSquares();
+    clearVirtualActionBoard();
+    selectedFigure = null;
+  }
+  console.log((virtualBoard[y][x]), virtualActionBoard[y][x]);
+  //Нажатие на клетку для движения
+  if (virtualBoard[y][x] == null && virtualActionBoard[y][x] == 'canMove' && selectedFigure) {
+    console.log(selectedFigure);
+    figureMove(selectedFigure, squareInfo(square));
+    clearVirtualActionBoard();
+    removeHighlightedSquares();
+    turnSwap();
+  }
+
+  if (virtualBoard[y][x] !== null && virtualActionBoard[y][x] == 'canEat' && selectedFigure) {
+    console.log("eat");
+    console.log(selectedFigure);
+    figureEat(selectedFigure, squareInfo(square));
+    clearVirtualActionBoard();
+    removeHighlightedSquares();
+    turnSwap();
   }
 }
 table.addEventListener('click', targetCell);
@@ -95,9 +120,11 @@ function searchMoveAvailable (coord) {
           if (type == 'king' || type == 'horse') {
             if (type == 'king') {
               squares.push({x: newX, y: newY});
+              virtualActionBoard[newY][newX] = 'canMove';
               break;
             } else if (type == 'horse') {
               squares.push({x: newX, y: newY});
+              virtualActionBoard[newY][newX] = 'canMove';
               break;
             } else {
               break;
@@ -106,13 +133,16 @@ function searchMoveAvailable (coord) {
             const startRow = directions == blackPawnDirection ? 1 : 6;
             if (startRow == y && step < 2) {
               squares.push({x: newX, y: newY});
+              virtualActionBoard[newY][newX] = 'canMove';
               step++;
             } else {
               squares.push({x: newX, y: newY});
+              virtualActionBoard[newY][newX] = 'canMove';
               break;
             }
           } else {
             squares.push({x: newX, y: newY});
+            virtualActionBoard[newY][newX] = 'canMove';
             step++;
           }
         } else {
@@ -124,8 +154,20 @@ function searchMoveAvailable (coord) {
   return squares;
 }
 
+function clearVirtualActionBoard() {
+  for (let y = 0; y < virtualActionBoard.length; y++) {
+    for (let x = 0; x < virtualActionBoard[y].length; x++) {
+      if (virtualActionBoard[y][x]) {
+        virtualActionBoard[y][x] = null;
+      }
+    }
+  }
+}
+
 function searchEatAvailable (coord) {
   const {x, y} = coord;
+  console.log(coord);
+  console.log(virtualBoard[y][x]);
   const {color, type, isMove} = virtualBoard[y][x];
   let directions;
   let squares = [];
@@ -160,8 +202,11 @@ function searchEatAvailable (coord) {
           }
         } else if (newSquare != null && type != 'pawn' && canEat(newSquare, color)) {
           squares.push({x: newX, y: newY});
+          virtualActionBoard[newY][newX] = 'canEat';
           break;
         } else if (newSquare != null && type != 'pawn' && !canEat(newSquare, color)) {
+          break;
+        } else {
           break;
         }
       }
@@ -172,4 +217,20 @@ function searchEatAvailable (coord) {
 
 function canEat(square, attackerColor) {
 	return square.color !== attackerColor;
+}
+
+function figureMove (startCoord, endCoord) {
+  const figure = virtualBoard[startCoord.y][startCoord.x];
+  virtualBoard[endCoord.y][endCoord.x] = figure;
+  virtualBoard[startCoord.y][startCoord.x] = null;
+
+  imageMove(startCoord, endCoord);
+}
+
+function figureEat (startCoord, endCoord) {
+  const figure = virtualBoard[startCoord.y][startCoord.x];
+  virtualBoard[endCoord.y][endCoord.x] = figure;
+  virtualBoard[startCoord.y][startCoord.x] = null;
+
+  imageMove(startCoord, endCoord, 'eat');
 }

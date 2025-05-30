@@ -1,6 +1,8 @@
 const table = document.querySelector('.table');
 
 let virtualBoard = Array(8).fill().map(() => Array(8).fill(null));
+let virtualActionBoard = Array(8).fill().map(() => Array(8).fill(null));
+
 
 function createCube (color) {
   if (color == 'light-brown') {
@@ -246,8 +248,8 @@ const lastRow = document.querySelector('#_7');
 function fillFigures () {
   fillBishop();
   fillHorse();
-  fillKing();
-  fillPawn();
+  //fillKing();
+  //fillPawn();
   fillQueen();
   fillRook();
 }
