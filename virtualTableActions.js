@@ -43,7 +43,7 @@ function targetCell(event) {
     figureMove(selectedFigure, squareInfo(square));
     clearVirtualActionBoard();
     removeHighlightedSquares();
-    turnSwap();
+    //turnSwap();
   }
 
   if (virtualBoard[y][x] !== null && virtualActionBoard[y][x] == 'canEat' && selectedFigure) {
@@ -52,7 +52,7 @@ function targetCell(event) {
     figureEat(selectedFigure, squareInfo(square));
     clearVirtualActionBoard();
     removeHighlightedSquares();
-    turnSwap();
+    //turnSwap();
   }
 }
 table.addEventListener('click', targetCell);
@@ -193,8 +193,18 @@ function searchEatAvailable (coord) {
         if (!newRow) break;
 
         let newSquare = newRow[newX];
-          
-        if (newSquare == null && type != 'pawn') {
+
+        if (type == 'pawn') {
+          if (newRow[parseInt(newX) + 1] != null && canEat(newRow[parseInt(newX) + 1], color)) {
+            squares.push({x: newX + 1, y: newY});
+            virtualActionBoard[newY][newX + 1] = 'canEat';
+          }
+          if (newRow[parseInt(newX) - 1] != null && canEat(newRow[parseInt(newX) - 1], color)) {
+            squares.push({x: newX - 1, y: newY});
+            virtualActionBoard[newY][newX - 1] = 'canEat';
+          }
+          break;
+        } else if (newSquare == null && type != 'pawn') {
           if (type == 'king' || type == 'horse') {
             break;
           } else {
