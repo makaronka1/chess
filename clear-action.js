@@ -355,12 +355,12 @@ function highlightSelectedFigure (coord) {
 // 	removeHighlightedSquares();
 // }
 
-function figureEat(target) {
-	let targetParent = target.parentElement;
-	targetParent.removeChild(targetParent.firstChild);
-	targetParent.appendChild(selectedFigure);
-	removeHighlightedSquares();
-}
+// function figureEat(target) {
+// 	let targetParent = target.parentElement;
+// 	targetParent.removeChild(targetParent.firstChild);
+// 	targetParent.appendChild(selectedFigure);
+// 	removeHighlightedSquares();
+// }
 
 
 function removeHighlightedSquares () {
@@ -610,15 +610,16 @@ function check () {
 
 function showModal() {
   selectedTransformFigure = selectedFigure;
+  const {x, y} = selectedTransformFigure;
   const figuresTransformType = ['Bishop', 'Horse', 'Rook', 'Queen'];
   const transformImg = document.querySelectorAll(".transformimg");
   let i = 0;
-  if (selectedFigure.classList.contains('white')){
+  if (virtualBoard[y][x].color == 'white'){
     for (const img of transformImg) {
       img.src = `img/white/white${figuresTransformType[i]}.png`;
       i++;
     }
-  } else if (selectedFigure.classList.contains('black')) {
+  } else if (virtualBoard[y][x].color == 'black') {
     for (const img of transformImg) {
       img.src = `img/black/black${figuresTransformType[i]}.png`;
       i++;
@@ -630,22 +631,24 @@ function showModal() {
 }
 
 function hideModal() {
-  let selectedTransformFigureColor = selectedTransformFigure.classList.item(0);
-  const selectedTransformFigureSquare = selectedTransformFigure.parentElement;
+  const {x, y} = selectedTransformFigure;
+  let selectedTransformFigureColor = virtualBoard[y][x].color;
+  const selectedTransformFigureRow = document.querySelector(`#_${y}`);
+  const selectedTransformFigureSquare = selectedTransformFigureRow.children[x];
   const selectedRadio = document.querySelector('input[name="figure"]:checked');  
   const selectedFigureType = selectedRadio.value;
 
   let figure = document.createElement('img');
   figure.setAttribute('src', `img/${selectedTransformFigureColor}/${selectedTransformFigureColor}${selectedFigureType}.png`);
-  figure.classList.add(`${selectedTransformFigureColor}`, `${selectedFigureType.toLowerCase()}`);
-  selectedTransformFigureSquare.removeChild(selectedTransformFigure);
+  virtualBoard[y][x].type = selectedFigureType.toLowerCase();
+  selectedTransformFigureSquare.removeChild(selectedTransformFigureSquare.firstChild);
   selectedTransformFigureSquare.appendChild(figure);
 
   modalOverlay.style.display = 'none';
   pawnTransformContainer.style.display = 'none';
   document.body.style.overflow = '';
-  check();
-  checkMate();
+  //check();
+  //checkMate();
 }
 
 function findKing (color) {
