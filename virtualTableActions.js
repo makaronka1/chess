@@ -19,7 +19,7 @@ function targetCell(event) {
     if (figure.color == moveTurn) {
 	    removeHighlightedSquares();
       const squareCoord = squareInfo(square);
-      selectedFigure = squareCoord;
+      selectedFigureSquare = squareCoord;
       highlightSelectedFigure(squareCoord);
       const moveSquares = searchMoveAvailable(squareCoord);
       const eatSquares = searchEatAvailable(squareCoord);
@@ -34,22 +34,29 @@ function targetCell(event) {
   if (virtualActionBoard[y][x] == null && virtualBoard[y][x] == null) {
   	removeHighlightedSquares();
     clearVirtualActionBoard();
-    selectedFigure = null;
+    selectedFigureSquare = null;
   }
   console.log((virtualBoard[y][x]), virtualActionBoard[y][x]);
   //Нажатие на клетку для движения
-  if (virtualBoard[y][x] == null && virtualActionBoard[y][x] == 'canMove' && selectedFigure) {
-    console.log(selectedFigure);
-    figureMove(selectedFigure, squareInfo(square));
+  if (virtualBoard[y][x] == null && virtualActionBoard[y][x] == 'canMove' && selectedFigureSquare) {
+    console.log(selectedFigureSquare);
+    figureMove(selectedFigureSquare, squareInfo(square));
+    //Трансформация пешки
+    if ((squareInfo(square).y == 7 || squareInfo(square).y == 0) && virtualBoard[selectedFigureSquare.y][selectedFigureSquare.x].type == 'pawn') {
+      selectedTransformFigure = squareInfo(square);
+      showModal();
+      virtualBoard[selectedFigureSquare.y][selectedFigureSquare.x] = null;
+    }
+    virtualBoard[selectedFigureSquare.y][selectedFigureSquare.x] = null;
     clearVirtualActionBoard();
     removeHighlightedSquares();
     //turnSwap();
   }
 
-  if (virtualBoard[y][x] !== null && virtualActionBoard[y][x] == 'canEat' && selectedFigure) {
+  if (virtualBoard[y][x] !== null && virtualActionBoard[y][x] == 'canEat' && selectedFigureSquare) {
     console.log("eat");
-    console.log(selectedFigure);
-    figureEat(selectedFigure, squareInfo(square));
+    console.log(selectedFigureSquare);
+    figureEat(selectedFigureSquare, squareInfo(square));
     clearVirtualActionBoard();
     removeHighlightedSquares();
     //turnSwap();
@@ -232,7 +239,6 @@ function canEat(square, attackerColor) {
 function figureMove (startCoord, endCoord) {
   const figure = virtualBoard[startCoord.y][startCoord.x];
   virtualBoard[endCoord.y][endCoord.x] = figure;
-  virtualBoard[startCoord.y][startCoord.x] = null;
 
   imageMove(startCoord, endCoord);
 }

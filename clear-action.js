@@ -1,4 +1,4 @@
-let selectedFigure;
+let selectedFigureSquare;
 let selectedTransformFigure;
 
 let moveTurn = 'white';
@@ -131,30 +131,11 @@ function figureInfo(target) {
   };
 }
 
-function pawnTransform(target) {
-  if (selectedFigure.classList.contains('pawn')) {
-    const targetType = target.classList.contains('cube') ? 'cube' : 'figure';
-    
-    let targetRow;
-    if (targetType === 'cube') {
-      targetRow = target.parentElement;
-    } else {
-      targetRow = target.parentElement.parentElement;
-    }
-
-    if (targetRow && (targetRow.id === '_0' || targetRow.id === '_7')) {
-      showModal();
-    } else {
-      console.log(false);
-    }
-  }
-}
-
 function enpassant (targetSquare) {
   const eventTargetRow = targetSquare.parentElement;
 	const squareIndex = Array.from(eventTargetRow.children).indexOf(targetSquare);
-  targetSquare.appendChild(selectedFigure);
-  if (selectedFigure.classList.contains('black')) {
+  targetSquare.appendChild(selectedFigureSquare);
+  if (selectedFigureSquare.classList.contains('black')) {
     const whitePawnRow = document.querySelector('#_4');
     whitePawnRow.children[squareIndex].removeChild(whitePawnRow.children[squareIndex].firstChild);
   } else {
@@ -443,13 +424,13 @@ function castling (target) {
 
   if (isLong) {
     parent.children[parseInt(index) + parseInt(3)].appendChild(target);
-    parent.children[parseInt(index) + parseInt(2)].appendChild(selectedFigure);
+    parent.children[parseInt(index) + parseInt(2)].appendChild(selectedFigureSquare);
   } else {
     parent.children[parseInt(index) + parseInt(-2)].appendChild(target);
-    parent.children[parseInt(index) + parseInt(-1)].appendChild(selectedFigure);
+    parent.children[parseInt(index) + parseInt(-1)].appendChild(selectedFigureSquare);
   }
   target.classList.remove('not-go');
-  selectedFigure.classList.remove('not-go');
+  selectedFigureSquare.classList.remove('not-go');
 }
 //передаем клетку и цвет фигур которые ее атакуют.
 function isUnderAttack(color, square) {
@@ -566,7 +547,7 @@ function isUnderAttack(color, square) {
   return isAttacked;
 }
 
-function nextTurnSimulate (figure, square, action) {
+/*function nextTurnSimulate (figure, square, action) {
   let result = false;
   const {color, opColor, type} = figureInfo(figure);
   if (action == 'move' && type == 'king') {
@@ -590,7 +571,7 @@ function nextTurnSimulate (figure, square, action) {
   }
   figure.classList.remove('phantom');
   return result;
-}
+}*/
 
 function check () {
   if (moveTurn == 'black') {
@@ -609,7 +590,6 @@ function check () {
 }
 
 function showModal() {
-  selectedTransformFigure = selectedFigure;
   const {x, y} = selectedTransformFigure;
   const figuresTransformType = ['Bishop', 'Horse', 'Rook', 'Queen'];
   const transformImg = document.querySelectorAll(".transformimg");
