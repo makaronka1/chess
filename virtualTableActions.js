@@ -250,3 +250,85 @@ function figureEat (startCoord, endCoord) {
 
   imageMove(startCoord, endCoord, 'eat');
 }
+
+function isUnderAttack (color, square) {
+  let isAttacked = false;
+  let allAttackSquares = [];
+  let allMoveSquares = [];
+  let allProtectedSquares = [];
+  for (let i = 0; i < 8; i++) {
+    for (let j = 0; j < 8; j++){
+      if (virtualBoard[i][j]?.color == color) {
+        const {color, type} = virtualBoard[i][j];
+        let directions;
+        directions = type == 'king' || type == 'queen' ? queenKingDirections
+          : type == 'bishop' ? bishopDirections 
+          : type == 'rook' ? rookDirections
+          : type == 'horse' ? horseDirections
+          : false;
+        if (type == 'pawn') {
+          directions = color == 'black' ? blackPawnDirection : whitePawnDirection; 
+        }
+        let x = j;
+        let y = i;
+        if (type != 'pawn') {
+          directions.forEach(direction =>  {
+          let step = 1;
+
+          while (true) {
+            let newX = parseInt(x) + parseInt(direction.x * step);
+            let newY = parseInt(y) + parseInt(direction.y * step);
+            if (newY > 7 || newY < 0 || newX > 7 || newX < 0) {
+              break;
+            }
+
+            let newRow = virtualBoard[newY];
+            if (!newRow) break;
+
+            let newSquare = newRow[newX];
+
+            if (newSquare == null) {
+              if (type == 'king' || type == 'horse') {
+                allMoveSquares.push({x: newX, y: newY});
+                break;
+              } else {
+                allMoveSquares.push({x: newX, y: newY});
+                step++;
+              }
+            } else {
+              virtualBoard[newY][newX].color == color ? allProtectedSquares.push({x: newX, y: newY}) : allAttackSquares.push({x: newX, y: newY});
+              break;
+            }
+          }
+          });
+        } else if (type == 'pawn') {
+          let step = 1;
+          let newX = parseInt(x) + parseInt(directions[0].x * step);
+          let newY = parseInt(y) + parseInt(directions[0].y * step);
+          let newRow = virtualBoard[newY];
+
+          if (newRow[parseInt(newX) + 1] != null) {
+            allAttackSquares.push({x: newX + 1, y: newY});
+          }
+          if (newRow[parseInt(newX) + 1] == null) {
+            allProtectedSquares.push({x: newX + 1, y: newY});
+          }
+          if (newRow[parseInt(newX) - 1] != null) {
+            allAttackSquares.push({x: newX - 1, y: newY});
+          }
+          if (newRow[parseInt(newX) - 1] == null) {
+            allAttackSquares.push({x: newX - 1, y: newY});
+          }
+        }
+
+      }
+    }
+  }
+  const resultMassive = allMoveSquares.concat(allProtectedSquares).concat(allAttackSquares);
+  for (let element of resultMassive) {
+    if (JSON.stringify(element) == JSON.stringify(square)) {
+      isAttacked = true;
+    }
+  }
+  return isAttacked;
+}
