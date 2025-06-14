@@ -575,16 +575,16 @@ function castling (target) {
 
 function check () {
   if (moveTurn == 'black') {
-    const kingSquare = document.querySelector('.black.king').parentElement;
+    const kingSquare = findKing('black');
     if (isUnderAttack('white', kingSquare)) {
       turnStatus.textContent += '. Шах';
-      kingSquare.classList.add('highlight-check');
+      document.querySelector(`#_${kingSquare.y}`).children[kingSquare.x].classList.add('highlight-check');
     }
   } else if (moveTurn == 'white') {
-    const kingSquare = document.querySelector('.white.king').parentElement;
+    const kingSquare = findKing('white');
     if (isUnderAttack('black', kingSquare)) {
       turnStatus.textContent += '. Шах';
-      kingSquare.classList.add('highlight-check');
+      document.querySelector(`#_${kingSquare.y}`).children[kingSquare.x].classList.add('highlight-check');
     }
   }
 }
