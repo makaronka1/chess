@@ -433,7 +433,7 @@ function castling (target) {
   selectedFigureSquare.classList.remove('not-go');
 }
 //передаем клетку и цвет фигур которые ее атакуют.
-function isUnderAttack(color, square) {
+/*function isUnderAttack(color, square) {
   const allFigures = document.querySelectorAll(`.${color}`);
   let isAttacked = false;
   let allAttackSquares = [];
@@ -545,7 +545,7 @@ function isUnderAttack(color, square) {
   }
 
   return isAttacked;
-}
+}*/
 
 /*function nextTurnSimulate (figure, square, action) {
   let result = false;
@@ -632,12 +632,14 @@ function hideModal() {
 }
 
 function findKing (color) {
-  const king = document.querySelector(`.king.${color}`);
-  const kingSquare = king.parentElement;
-  const kingRow = kingSquare.parentElement;
-  const cordx = Array.from(kingRow.children).indexOf(kingSquare);
-  const cordy = kingRow.id.slice(1);
-  return [cordx, cordy, king];
+  for (let i = 0; i < 8; i++) {
+    for (let j = 0; j < 8; j++){
+      if (virtualBoard[i][j]?.type == 'king' && virtualBoard[i][j]?.color == color) {
+        return {x: j, y: i};
+      }
+    }
+  }
+  return false;
 }
 
 function checkMate () {
