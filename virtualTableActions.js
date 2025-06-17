@@ -332,3 +332,10 @@ function isUnderAttack (color, square) {
   }
   return isAttacked;
 }
+
+function createInvisibleClone (figure) {
+  const {x, y} = figure;
+  let clone = {...virtualBoard[y][x]};
+
+  return clone;
+}
