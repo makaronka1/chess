@@ -91,7 +91,9 @@ function fillPawn () {
     virtualBoard[blackPawnRow.id.slice(1)][i] = {
       color: 'black',
       type: 'pawn',
-      isMove: false
+      isMove: false,
+      phantom: false,
+      opColor: 'white'
     };
     i++;
   }
@@ -102,7 +104,9 @@ function fillPawn () {
     virtualBoard[whitePawnRow.id.slice(1)][i] = {
       color: 'white',
       type: 'pawn',
-      isMove: false
+      isMove: false,
+      phantom: false,
+      opColor: 'black'
     };
     i++;
   }
@@ -122,13 +126,17 @@ function fillHorse () {
       virtualBoard[lastRow.id.slice(1)][i] = {
         color: 'white',
         type: 'horse',
-        isMove: false
+        isMove: false,
+        phantom: false,
+        opColor: 'black'
       };
       whiteHorseSquares[i].appendChild(whiteHorseImg);
       virtualBoard[firstRow.id.slice(1)][i] = {
         color: 'black',
         type: 'horse',
-        isMove: false
+        isMove: false,
+        phantom: false,
+        opColor: 'white'
       };
       
     }
@@ -147,13 +155,17 @@ function fillBishop () {
     virtualBoard[firstRow.id.slice(1)][index] = {
         color: 'black',
         type: 'bishop',
-        isMove: false
+        isMove: false,
+        phantom: false,
+        opColor: 'white'
     };
     whiteBishopSquares[i].appendChild(whiteBishopImg);
     virtualBoard[lastRow.id.slice(1)][index] = {
       color: 'white',
       type: 'bishop',
-      isMove: false
+      isMove: false,
+      phantom: false,
+      opColor: 'black'
     };
   }
 }
@@ -170,14 +182,18 @@ function fillKing () {
   virtualBoard[firstRow.id.slice(1)][4] = {
     color: 'black',
     type: 'king',
-    isMove: false
+    isMove: false,
+    phantom: false,
+    opColor: 'white'
   };
   whiteKingImg.setAttribute('src', 'img/white/whiteKing.png');
   whiteKingImg.classList.add('white', 'king', 'not-go');
   virtualBoard[lastRow.id.slice(1)][4] = {
     color: 'white',
     type: 'king',
-    isMove: false
+    isMove: false,
+    phantom: false,
+    opColor: 'black'
   };
 
   blackKingSquare.appendChild(blackKingImg);
@@ -192,13 +208,17 @@ function fillQueen () {
   virtualBoard[firstRow.id.slice(1)][3] = {
     color: 'black',
     type: 'queen',
-    isMove: false
+    isMove: false,
+    phantom: false,
+    opColor: 'white'
   };
   let whiteQueenImg = createFigure('white', 'Queen');
   virtualBoard[lastRow.id.slice(1)][3] = {
     color: 'white',
     type: 'queen',
-    isMove: false
+    isMove: false,
+    phantom: false,
+    opColor: 'black'
   };
 
   blackQueenSquare.appendChild(blackQueenImg);
@@ -219,13 +239,17 @@ function fillRook () {
     virtualBoard[firstRow.id.slice(1)][index] = {
       color: 'black',
       type: 'rook',
-      isMove: false
+      isMove: false,
+      phantom: false,
+      opColor: 'white'
     };
     whiteRookSquares[i].appendChild(whiteRookImg);
     virtualBoard[lastRow.id.slice(1)][index] = {
       color: 'white',
       type: 'rook',
-      isMove: false
+      isMove: false,
+      phantom: false,
+      opColor: 'black'
     };
   }
 }
@@ -246,12 +270,12 @@ const lastRow = document.querySelector('#_7');
 
 
 function fillFigures () {
-  fillBishop();
-  fillHorse();
-  //fillKing();
-  //fillPawn();
+  //fillBishop();
+  //fillHorse();
+  fillKing();
+  fillPawn();
   fillQueen();
-  fillRook();
+  //fillRook();
 }
 
 fillFigures();
