@@ -108,25 +108,17 @@ const whitePawnDirection = [
   }
 }*/
 
-function figureInfo(target) {
+function figureInfo(coord) {
 
-  const eventTargetSquare = target.parentElement;
-  const eventTargetRow = eventTargetSquare.parentElement;
-
-  const figureRowId = eventTargetRow.id;
-  const squareIndex = Array.from(eventTargetRow.children).indexOf(eventTargetSquare);
-  const clearFigureRowId = figureRowId.slice(1);
-  const targetFigureType = target.classList.item(1);
-  const targetFigureColor = target.classList.item(0);
-  const opColor = targetFigureColor == 'white' ? 'black' : 'white';
+  const {x,y} = coord;
+  const figure = virtualBoard[y][x];
+  const {color, type, isMove, phantom, opColor} = figure;
 
   return {
-    square: eventTargetSquare,
-    row: eventTargetRow,
-    rowId: clearFigureRowId,
-    squareIndex: squareIndex,
-    type: targetFigureType,
-    color: targetFigureColor,
+    color: color,
+    type: type,
+    isMove: isMove,
+    phantom: phantom,
     opColor: opColor
   };
 }
