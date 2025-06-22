@@ -131,7 +131,7 @@ function searchMoveAvailable (coord) {
               squares.push({x: newX, y: newY});
               virtualActionBoard[newY][newX] = 'canMove';
               break;
-            } else if (type == 'horse') {
+            } else if (type == 'horse' && nextTurnSimulate({x: x, y: y}, {x: newX, y: newY}, 'move')) {
               squares.push({x: newX, y: newY});
               virtualActionBoard[newY][newX] = 'canMove';
               break;
@@ -140,19 +140,23 @@ function searchMoveAvailable (coord) {
             }
           } else if (type == 'pawn') {
             const startRow = directions == blackPawnDirection ? 1 : 6;
-            if (startRow == y && step < 2) {
+            if (startRow == y && step < 2 && nextTurnSimulate({x: x, y: y}, {x: newX, y: newY}, 'move')) {
               squares.push({x: newX, y: newY});
               virtualActionBoard[newY][newX] = 'canMove';
               step++;
-            } else {
+            } else if (nextTurnSimulate({x: x, y: y}, {x: newX, y: newY}, 'move')){
               squares.push({x: newX, y: newY});
               virtualActionBoard[newY][newX] = 'canMove';
               break;
+            } else {
+              break;
             }
-          } else {
+          } else if (nextTurnSimulate({x: x, y: y}, {x: newX, y: newY}, 'move')){
             squares.push({x: newX, y: newY});
             virtualActionBoard[newY][newX] = 'canMove';
             step++;
+          } else {
+            break;
           }
         } else {
           break;
@@ -204,11 +208,11 @@ function searchEatAvailable (coord) {
         let newSquare = newRow[newX];
 
         if (type == 'pawn') {
-          if (newRow[parseInt(newX) + 1] != null && canEat(newRow[parseInt(newX) + 1], color)) {
+          if (newRow[parseInt(newX) + 1] != null && canEat(newRow[parseInt(newX) + 1], color) && nextTurnSimulate({x: x, y: y}, {x: newX + 1, y: newY}, 'eat')) {
             squares.push({x: newX + 1, y: newY});
             virtualActionBoard[newY][newX + 1] = 'canEat';
           }
-          if (newRow[parseInt(newX) - 1] != null && canEat(newRow[parseInt(newX) - 1], color)) {
+          if (newRow[parseInt(newX) - 1] != null && canEat(newRow[parseInt(newX) - 1], color) && nextTurnSimulate({x: x, y: y}, {x: newX - 1, y: newY}, 'eat')) {
             squares.push({x: newX - 1, y: newY});
             virtualActionBoard[newY][newX - 1] = 'canEat';
           }
@@ -219,7 +223,7 @@ function searchEatAvailable (coord) {
           } else {
             step++;
           }
-        } else if (newSquare != null && type != 'pawn' && canEat(newSquare, color)) {
+        } else if (newSquare != null && type != 'pawn' && canEat(newSquare, color) && nextTurnSimulate({x: x, y: y}, {x: newX, y: newY}, 'eat')) {
           squares.push({x: newX, y: newY});
           virtualActionBoard[newY][newX] = 'canEat';
           break;
