@@ -240,13 +240,14 @@ function canEat(square, attackerColor) {
 function figureMove (startCoord, endCoord) {
   const figure = virtualBoard[startCoord.y][startCoord.x];
   virtualBoard[endCoord.y][endCoord.x] = figure;
-
+  virtualBoard[endCoord.y][endCoord.x].isMove = true;
   imageMove(startCoord, endCoord);
 }
 
 function figureEat (startCoord, endCoord) {
   const figure = virtualBoard[startCoord.y][startCoord.x];
   virtualBoard[endCoord.y][endCoord.x] = figure;
+  virtualBoard[endCoord.y][endCoord.x].isMove = true;
   virtualBoard[startCoord.y][startCoord.x] = null;
 
   imageMove(startCoord, endCoord, 'eat');
