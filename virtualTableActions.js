@@ -41,6 +41,7 @@ function targetCell(event) {
   if (virtualBoard[y][x] == null && virtualActionBoard[y][x] == 'canMove' && selectedFigureSquare) {
     console.log(selectedFigureSquare);
     figureMove(selectedFigureSquare, squareInfo(square));
+    removeHighlightedCheck();
     //Трансформация пешки
     if ((squareInfo(square).y == 7 || squareInfo(square).y == 0) && virtualBoard[selectedFigureSquare.y][selectedFigureSquare.x].type == 'pawn') {
       selectedTransformFigure = squareInfo(square);
@@ -58,6 +59,7 @@ function targetCell(event) {
     console.log("eat");
     console.log(selectedFigureSquare);
     figureEat(selectedFigureSquare, squareInfo(square));
+    removeHighlightedCheck();
     clearVirtualActionBoard();
     removeHighlightedSquares();
     turnSwap();
@@ -97,8 +99,7 @@ function highlightAvailableEatSquares (squares) {
 
 function searchMoveAvailable (coord) {
   const {x, y} = coord;
-  const {color, type, isMove} = virtualBoard[y][x];
-  const opColoro = color == 'white' ? 'black' : 'white'; 
+  const {color, type, isMove, opColor} = virtualBoard[y][x];
   let directions;
   let squares = [];
   directions = type == 'king' || type == 'queen' ? queenKingDirections
@@ -126,7 +127,7 @@ function searchMoveAvailable (coord) {
           
         if (newSquare === null) {
           if (type == 'king' || type == 'horse') {
-            if (type == 'king' && !isUnderAttack(opColoro, {x: newX, y: newY})) {
+            if (type == 'king' && !isUnderAttack(opColor, {x: newX, y: newY}) && nextTurnSimulate({x: x, y: y}, {x: newX, y: newY}, 'move')) {
               squares.push({x: newX, y: newY});
               virtualActionBoard[newY][newX] = 'canMove';
               break;
@@ -297,6 +298,9 @@ function isUnderAttack (color, square) {
                 allMoveSquares.push({x: newX, y: newY});
                 step++;
               }
+            } else if (newSquare.phantom == true) {
+              allMoveSquares.push({x: newX, y: newY});
+              step++;
             } else {
               virtualBoard[newY][newX].color == color ? allProtectedSquares.push({x: newX, y: newY}) : allAttackSquares.push({x: newX, y: newY});
               break;
@@ -340,4 +344,29 @@ function createInvisibleClone (figure) {
   let clone = {...virtualBoard[y][x]};
 
   return clone;
+}
+
+function nextTurnSimulate (figureCoord, squareCoord, action) {
+  let result = false;
+  const {color, opColor, type} = figureInfo(figureCoord);
+  if (action == 'move' && type == 'king') {
+    virtualBoard[figureCoord.y][figureCoord.x].phantom = true;
+    result = !isUnderAttack(opColor, squareCoord);
+  } else if (action == 'move' && type != 'king') {
+    const clone = createInvisibleClone(figureCoord);
+    virtualBoard[figureCoord.y][figureCoord.x].phantom = true;
+    virtualBoard[squareCoord.y][squareCoord.x] = clone;
+    const king = findKing(color);
+    result = !isUnderAttack(opColor, king);
+    virtualBoard[squareCoord.y][squareCoord.x] = null;
+  } else if (action == 'eat' && type != 'king') {
+    const king = findKing(color);
+    let eatbleFigure = {...virtualBoard[squareCoord.y][squareCoord.x]};
+    virtualBoard[squareCoord.y][squareCoord.x] = figureInfo(figureCoord);
+    virtualBoard[figureCoord.y][figureCoord.x].phantom = true;
+    result = !isUnderAttack(opColor, king);
+    virtualBoard[squareCoord.y][squareCoord.x] = eatbleFigure;
+  }
+  virtualBoard[figureCoord.y][figureCoord.x].phantom = false;
+  return result;
 }
