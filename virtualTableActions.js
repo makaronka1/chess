@@ -50,7 +50,8 @@ function targetCell(event) {
     virtualBoard[selectedFigureSquare.y][selectedFigureSquare.x] = null;
     clearVirtualActionBoard();
     removeHighlightedSquares();
-    //turnSwap();
+    turnSwap();
+    check();
   }
 
   if (virtualBoard[y][x] !== null && virtualActionBoard[y][x] == 'canEat' && selectedFigureSquare) {
@@ -59,7 +60,8 @@ function targetCell(event) {
     figureEat(selectedFigureSquare, squareInfo(square));
     clearVirtualActionBoard();
     removeHighlightedSquares();
-    //turnSwap();
+    turnSwap();
+    check();
   }
 }
 table.addEventListener('click', targetCell);
@@ -95,9 +97,8 @@ function highlightAvailableEatSquares (squares) {
 
 function searchMoveAvailable (coord) {
   const {x, y} = coord;
-  console.log(coord);
-  console.log(virtualBoard[y][x]);
   const {color, type, isMove} = virtualBoard[y][x];
+  const opColoro = color == 'white' ? 'black' : 'white'; 
   let directions;
   let squares = [];
   directions = type == 'king' || type == 'queen' ? queenKingDirections
@@ -125,7 +126,7 @@ function searchMoveAvailable (coord) {
           
         if (newSquare === null) {
           if (type == 'king' || type == 'horse') {
-            if (type == 'king') {
+            if (type == 'king' && !isUnderAttack(opColoro, {x: newX, y: newY})) {
               squares.push({x: newX, y: newY});
               virtualActionBoard[newY][newX] = 'canMove';
               break;
