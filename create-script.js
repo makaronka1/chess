@@ -254,11 +254,11 @@ function fillRook () {
   }
 }
 
-function createInvisibleClone (figure) {
-  let clone = document.createElement('img');
-  clone.classList.add(figure.classList.item(0), figure.classList.item(1));
-  return clone;
-}
+// function createInvisibleClone (figure) {
+//   let clone = document.createElement('img');
+//   clone.classList.add(figure.classList.item(0), figure.classList.item(1));
+//   return clone;
+// }
 
 
 
@@ -270,10 +270,10 @@ const lastRow = document.querySelector('#_7');
 
 
 function fillFigures () {
-  //fillBishop();
-  //fillHorse();
+  fillBishop();
+  fillHorse();
   fillKing();
-  fillPawn();
+  //fillPawn();
   fillQueen();
   //fillRook();
 }
