@@ -69,6 +69,16 @@ function targetCell(event) {
     turnSwap();
     check();
   }
+
+  if (virtualBoard[y][x] !== null && virtualActionBoard[y][x] == 'canCastling' && selectedFigureSquare) {
+    console.log("castling");
+    console.log(selectedFigureSquare);
+    castling({x: x, y: y});
+    clearVirtualActionBoard();
+    removeHighlightedSquares();
+    turnSwap();
+    check();
+  }
 }
 table.addEventListener('click', targetCell);
 
@@ -86,26 +96,32 @@ function squareInfo (square) {
 }
 
 function highlightAvailableMoveSquares (squares) {
-  for (const square of squares) {
-    const {x, y} = square;
-    let squareForHighlight = document.querySelector(`#_${y}`).children[x];
-    squareForHighlight.classList.add('highlight-green');
+  if (squares) {
+    for (const square of squares) {
+      const {x, y} = square;
+      let squareForHighlight = document.querySelector(`#_${y}`).children[x];
+      squareForHighlight.classList.add('highlight-green');
+    }
   }
 }
 
 function highlightAvailableEatSquares (squares) {
-  for (const square of squares) {
-    const {x, y} = square;
-    let squareForHighlight = document.querySelector(`#_${y}`).children[x];
-    squareForHighlight.classList.add('highlight-red');
+  if (squares) {
+    for (const square of squares) {
+      const {x, y} = square;
+      let squareForHighlight = document.querySelector(`#_${y}`).children[x];
+      squareForHighlight.classList.add('highlight-red');
+    }
   }
 }
 
 function highlightCastlingSquares (squares) {
-  for (const square of squares) {
-    const {x, y} = square;
-    let squareForHighlight = document.querySelector(`#_${y}`).children[x];
-    squareForHighlight.classList.add('highlight-green');
+  if (squares) {
+    for (const square of squares) {
+      const {x, y} = square;
+      let squareForHighlight = document.querySelector(`#_${y}`).children[x];
+      squareForHighlight.classList.add('highlight-green');
+    }
   }
 }
 
