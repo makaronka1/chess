@@ -410,6 +410,7 @@ function removeHighlightedCheck () {
 function isCastling (figureCoord) {
   const {x, y} = figureCoord;
   const figure = virtualBoard[y][x];
+  let result = [];
   if (figure.type != 'king' || figure.color != moveTurn || figure.isMove != false || isUnderAttack(figure.opColor, figureCoord)) {
     return;
   } else {
@@ -424,6 +425,7 @@ function isCastling (figureCoord) {
 
     if (isEmpty && !isUnderAttack(figure.opColor, figureCoord)) {
       virtualActionBoard[rowNumber][0] = 'canCastling';
+      result.push({x: 0, y: rowNumber});
     }
   }
     
@@ -437,9 +439,12 @@ function isCastling (figureCoord) {
 
     if (isEmpty && !isUnderAttack(figure.opColor, figureCoord)) {
       virtualActionBoard[rowNumber][7] = 'canCastling';
+      result.push({x: 7, y: rowNumber});
     }
   }
   }
+
+  return result;
 }
 
 function castling (target) {
