@@ -365,46 +365,81 @@ function removeHighlightedCheck () {
 }
 
 
-function isCastling(target) {
-  const {type, color, opColor, row} = figureInfo(target);
-  let result = [];
+// function isCastling(target) {
+//   const {type, color, opColor, row} = figureInfo(target);
+//   let result = [];
 
-  if (type != 'king' || !target.classList.contains('not-go')) {
+//   if (type != 'king' || !target.classList.contains('not-go')) {
+//     return;
+//   }
+
+//   if (!row) return;
+
+//   if (isUnderAttack(opColor, target.parentElement)) {
+//     return;
+//   }
+
+//   const leftRook = row.children[0]?.children[0];
+//   if (leftRook?.classList?.contains('not-go') && leftRook.classList.item(0) === color) {
+//     const isEmpty = [1, 2, 3].every(index => {
+//       const square = row.children[index];
+//       return !square?.hasChildNodes() && !isUnderAttack(opColor, square);
+//     });
+    
+//     const kingTargetSquare = row.children[2];
+//     if (isEmpty && !isUnderAttack(opColor, kingTargetSquare)) {
+//       result.push(row.children[0]);
+//     }
+//   }
+
+//   const rightRook = row.children[7]?.children[0];
+//   if (rightRook?.classList?.contains('not-go') && rightRook.classList.item(0) === color) {
+//     const isEmpty = [5, 6].every(index => {
+//       const square = row.children[index];
+//       return !square?.hasChildNodes() && !isUnderAttack(opColor, square);
+//     });
+    
+//     const kingTargetSquare = row.children[6];
+//     if (isEmpty && !isUnderAttack(opColor, kingTargetSquare)) {
+//       result.push(row.children[7]);
+//     }
+//   }
+//   return result;
+// }
+
+function isCastling (figureCoord) {
+  const {x, y} = figureCoord;
+  const figure = virtualBoard[y][x];
+  if (figure.type != 'king' || figure.color != moveTurn || figure.isMove != false || isUnderAttack(figure.opColor, figureCoord)) {
     return;
-  }
-
-  if (!row) return;
-
-  if (isUnderAttack(opColor, target.parentElement)) {
-    return;
-  }
-
-  const leftRook = row.children[0]?.children[0];
-  if (leftRook?.classList?.contains('not-go') && leftRook.classList.item(0) === color) {
+  } else {
+    const leftRook = figure.color == 'white' ? virtualBoard[7][0] : virtualBoard[0][0];
+    const rowNumber = figure.color == 'white' ? 7 : 0;
+  if (leftRook != null && leftRook.isMove == false && leftRook.type == 'rook' && leftRook.color == figure.color) {
     const isEmpty = [1, 2, 3].every(index => {
-      const square = row.children[index];
-      return !square?.hasChildNodes() && !isUnderAttack(opColor, square);
-    });
-    
-    const kingTargetSquare = row.children[2];
-    if (isEmpty && !isUnderAttack(opColor, kingTargetSquare)) {
-      result.push(row.children[0]);
-    }
-  }
+      const square = {x: index, y: rowNumber};
 
-  const rightRook = row.children[7]?.children[0];
-  if (rightRook?.classList?.contains('not-go') && rightRook.classList.item(0) === color) {
-    const isEmpty = [5, 6].every(index => {
-      const square = row.children[index];
-      return !square?.hasChildNodes() && !isUnderAttack(opColor, square);
+      return virtualBoard[square.y][square.x] == null && !isUnderAttack(figure.opColor, square);
     });
-    
-    const kingTargetSquare = row.children[6];
-    if (isEmpty && !isUnderAttack(opColor, kingTargetSquare)) {
-      result.push(row.children[7]);
+
+    if (isEmpty && !isUnderAttack(figure.opColor, figureCoord)) {
+      virtualActionBoard[rowNumber][0] = 'canCastling';
     }
   }
-  return result;
+    
+  const righRook = figure.color == 'white' ? virtualBoard[7][7] : virtualBoard[0][7];
+  if (righRook != null && righRook.isMove == false && righRook.type == 'rook' && righRook.color == figure.color) {
+    const isEmpty = [5, 6].every(index => {
+      const square = {x: index, y: rowNumber};
+
+      return virtualBoard[square.y][square.x] == null && !isUnderAttack(figure.opColor, square);
+    });
+
+    if (isEmpty && !isUnderAttack(figure.opColor, figureCoord)) {
+      virtualActionBoard[rowNumber][7] = 'canCastling';
+    }
+  }
+  }
 }
 
 function castling (target) {

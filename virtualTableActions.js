@@ -23,6 +23,9 @@ function targetCell(event) {
       highlightSelectedFigure(squareCoord);
       const moveSquares = searchMoveAvailable(squareCoord);
       const eatSquares = searchEatAvailable(squareCoord);
+      if (figure.type == 'king') {
+        isCastling(squareCoord);
+      }
       highlightAvailableMoveSquares(moveSquares);
       highlightAvailableEatSquares(eatSquares);
     } else {
