@@ -24,7 +24,8 @@ function targetCell(event) {
       const moveSquares = searchMoveAvailable(squareCoord);
       const eatSquares = searchEatAvailable(squareCoord);
       if (figure.type == 'king') {
-        isCastling(squareCoord);
+        const castlingSquares = isCastling(squareCoord);
+        highlightCastlingSquares(castlingSquares);
       }
       highlightAvailableMoveSquares(moveSquares);
       highlightAvailableEatSquares(eatSquares);
@@ -97,6 +98,14 @@ function highlightAvailableEatSquares (squares) {
     const {x, y} = square;
     let squareForHighlight = document.querySelector(`#_${y}`).children[x];
     squareForHighlight.classList.add('highlight-red');
+  }
+}
+
+function highlightCastlingSquares (squares) {
+  for (const square of squares) {
+    const {x, y} = square;
+    let squareForHighlight = document.querySelector(`#_${y}`).children[x];
+    squareForHighlight.classList.add('highlight-green');
   }
 }
 
