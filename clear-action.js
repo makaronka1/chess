@@ -1,51 +1,47 @@
 let selectedFigureSquare;
 let selectedTransformFigure;
 
-let moveTurn = 'white';
-const figuresTypes = ['bishop', 'king', 'queen', 'pawn', 'rook', 'horse'];
-const turnStatus = document.querySelector('#turn-status');
-const modalOverlay = document.getElementById('modalOverlay');
-const pawnTransformContainer = document.getElementById('pawnTransform');
-const confirmButton = document.getElementById('closeButton');
+let moveTurn = "white";
+const figuresTypes = ["bishop", "king", "queen", "pawn", "rook", "horse"];
+const turnStatus = document.querySelector("#turn-status");
+const modalOverlay = document.getElementById("modalOverlay");
+const pawnTransformContainer = document.getElementById("pawnTransform");
+const confirmButton = document.getElementById("closeButton");
 
 const queenKingDirections = [
-    { x: 1,  y: 1 },
-    { x: 1, y: -1 },
-    { x: -1,  y: 1 },
-    { x: -1,  y: -1 },
-    { x: 0, y: 1},
-    { x: 0, y: -1},
-    { x: 1, y: 0},
-    { x: -1, y: 0},
-    ];
+  { x: 1, y: 1 },
+  { x: 1, y: -1 },
+  { x: -1, y: 1 },
+  { x: -1, y: -1 },
+  { x: 0, y: 1 },
+  { x: 0, y: -1 },
+  { x: 1, y: 0 },
+  { x: -1, y: 0 },
+];
 const horseDirections = [
-    { x: 2, y: 1 },
-    { x: -2,  y: 1 },
-    { x: 1,  y: 2 },
-    { x: -1,  y: 2 },
-    { x: 2, y: -1 },
-    { x: -2,  y: -1 },
-    { x: 1,  y: -2 },
-    { x: -1,  y: -2 }
-    ];
+  { x: 2, y: 1 },
+  { x: -2, y: 1 },
+  { x: 1, y: 2 },
+  { x: -1, y: 2 },
+  { x: 2, y: -1 },
+  { x: -2, y: -1 },
+  { x: 1, y: -2 },
+  { x: -1, y: -2 },
+];
 const bishopDirections = [
-    { x: 1,  y: 1 },
-    { x: 1, y: -1 },
-    { x: -1,  y: 1 },
-    { x: -1,  y: -1 }
-    ];
+  { x: 1, y: 1 },
+  { x: 1, y: -1 },
+  { x: -1, y: 1 },
+  { x: -1, y: -1 },
+];
 const rookDirections = [
-    { x: 0, y: 1},
-    { x: 0, y: -1},
-    { x: 1, y: 0},
-    { x: -1, y: 0},
-    ];
-const blackPawnDirection = [
-    { x: 0, y: 1}
-    ];
-const whitePawnDirection = [
-    { x: 0, y: -1}
-    ];
+  { x: 0, y: 1 },
+  { x: 0, y: -1 },
+  { x: 1, y: 0 },
+  { x: -1, y: 0 },
+];
+const blackPawnDirection = [{ x: 0, y: 1 }];
+const whitePawnDirection = [{ x: 0, y: -1 }];
 
 /*function targetCell(event) {
   const target = event.target;
@@ -109,50 +105,57 @@ const whitePawnDirection = [
 }*/
 
 function figureInfo(coord) {
-
-  const {x,y} = coord;
+  const { x, y } = coord;
   const figure = virtualBoard[y][x];
-  const {color, type, isMove, phantom, opColor} = figure;
+  const { color, type, isMove, phantom, opColor } = figure;
 
   return {
     color: color,
     type: type,
     isMove: isMove,
     phantom: phantom,
-    opColor: opColor
+    opColor: opColor,
   };
 }
 
-function enpassant (targetSquare) {
+function enpassant(targetSquare) {
   const eventTargetRow = targetSquare.parentElement;
-	const squareIndex = Array.from(eventTargetRow.children).indexOf(targetSquare);
+  const squareIndex = Array.from(eventTargetRow.children).indexOf(targetSquare);
   targetSquare.appendChild(selectedFigureSquare);
-  if (selectedFigureSquare.classList.contains('black')) {
-    const whitePawnRow = document.querySelector('#_4');
-    whitePawnRow.children[squareIndex].removeChild(whitePawnRow.children[squareIndex].firstChild);
+  if (selectedFigureSquare.classList.contains("black")) {
+    const whitePawnRow = document.querySelector("#_4");
+    whitePawnRow.children[squareIndex].removeChild(
+      whitePawnRow.children[squareIndex].firstChild
+    );
   } else {
-    const blackPawnRow = document.querySelector('#_3');
-    blackPawnRow.children[squareIndex].removeChild(blackPawnRow.children[squareIndex].firstChild);
+    const blackPawnRow = document.querySelector("#_3");
+    blackPawnRow.children[squareIndex].removeChild(
+      blackPawnRow.children[squareIndex].firstChild
+    );
   }
 }
 
-function turnSwap () {
-  if (moveTurn == 'white') {
-    moveTurn = 'black';
+function turnSwap() {
+  if (moveTurn == "white") {
+    moveTurn = "black";
     try {
-      document.querySelector('.enpassant-black').classList.remove('enpassant-black');
+      document
+        .querySelector(".enpassant-black")
+        .classList.remove("enpassant-black");
     } catch {
-      console.log('Взятия на проходе нет.')
+      console.log("Взятия на проходе нет.");
     }
-    turnStatus.textContent = 'Ход черных';
+    turnStatus.textContent = "Ход черных";
   } else {
-    moveTurn = 'white';
+    moveTurn = "white";
     try {
-      document.querySelector('.enpassant-white').classList.remove('enpassant-white');
+      document
+        .querySelector(".enpassant-white")
+        .classList.remove("enpassant-white");
     } catch {
-      console.log('Взятия на проходе нет.')
+      console.log("Взятия на проходе нет.");
     }
-    turnStatus.textContent = 'Ход белых';
+    turnStatus.textContent = "Ход белых";
   }
 }
 
@@ -167,10 +170,10 @@ function turnSwap () {
 //   }
 // }
 
-function highlightSelectedFigure (coord) {
-  const {x, y} = coord;
+function highlightSelectedFigure(coord) {
+  const { x, y } = coord;
   const row = document.querySelector(`#_${y}`);
-  row.children[x].classList.add('highlight-blue');
+  row.children[x].classList.add("highlight-blue");
 }
 
 /*function searchAllAvailableSquares (target) {
@@ -294,10 +297,10 @@ function highlightSelectedFigure (coord) {
 
 // function canEat(square, attackerColor) {
 // 	if (!square.hasChildNodes()) return false;
-	
+
 // 	const figure = square.firstChild;
 // 	const defenderColor = figure.classList.item(0);
-	
+
 // 	return defenderColor !== attackerColor;
 // }
 
@@ -335,35 +338,31 @@ function highlightSelectedFigure (coord) {
 // 	removeHighlightedSquares();
 // }
 
+function removeHighlightedSquares() {
+  let highlightedGreenSquares = document.querySelectorAll(".highlight-green");
+  let highlightedRedSquares = document.querySelectorAll(".highlight-red");
+  let highlightedBlueSquares = document.querySelectorAll(".highlight-blue");
 
-function removeHighlightedSquares () {
-	let highlightedGreenSquares = document.querySelectorAll('.highlight-green');
-  let highlightedRedSquares = document.querySelectorAll('.highlight-red');
-  let highlightedBlueSquares = document.querySelectorAll('.highlight-blue');
+  for (let square of highlightedGreenSquares) {
+    square.classList.remove("highlight-green");
+  }
 
-  
-    for (let square of highlightedGreenSquares) {
-      square.classList.remove('highlight-green');
-    }
-  
-    for (let square of highlightedRedSquares) {
-      square.classList.remove('highlight-red');
-    }
+  for (let square of highlightedRedSquares) {
+    square.classList.remove("highlight-red");
+  }
 
-    for (let square of highlightedBlueSquares) {
-      square.classList.remove('highlight-blue');
-    }
-    
-}
-
-function removeHighlightedCheck () {
-  let highlightedCheckSquares = document.querySelectorAll('.highlight-check');
-
-  for (let square of highlightedCheckSquares) {
-    square.classList.remove('highlight-check');
+  for (let square of highlightedBlueSquares) {
+    square.classList.remove("highlight-blue");
   }
 }
 
+function removeHighlightedCheck() {
+  let highlightedCheckSquares = document.querySelectorAll(".highlight-check");
+
+  for (let square of highlightedCheckSquares) {
+    square.classList.remove("highlight-check");
+  }
+}
 
 // function isCastling(target) {
 //   const {type, color, opColor, row} = figureInfo(target);
@@ -385,7 +384,7 @@ function removeHighlightedCheck () {
 //       const square = row.children[index];
 //       return !square?.hasChildNodes() && !isUnderAttack(opColor, square);
 //     });
-    
+
 //     const kingTargetSquare = row.children[2];
 //     if (isEmpty && !isUnderAttack(opColor, kingTargetSquare)) {
 //       result.push(row.children[0]);
@@ -398,7 +397,7 @@ function removeHighlightedCheck () {
 //       const square = row.children[index];
 //       return !square?.hasChildNodes() && !isUnderAttack(opColor, square);
 //     });
-    
+
 //     const kingTargetSquare = row.children[6];
 //     if (isEmpty && !isUnderAttack(opColor, kingTargetSquare)) {
 //       result.push(row.children[7]);
@@ -407,39 +406,62 @@ function removeHighlightedCheck () {
 //   return result;
 // }
 
-function isCastling (figureCoord) {
-  const {x, y} = figureCoord;
+function isCastling(figureCoord) {
+  const { x, y } = figureCoord;
   const figure = virtualBoard[y][x];
   let result = [];
-  if (figure.type != 'king' || figure.color != moveTurn || figure.isMove != false || isUnderAttack(figure.opColor, figureCoord)) {
+  if (
+    figure.type != "king" ||
+    figure.color != moveTurn ||
+    figure.isMove != false ||
+    isUnderAttack(figure.opColor, figureCoord)
+  ) {
     return;
   } else {
-    const leftRook = figure.color == 'white' ? virtualBoard[7][0] : virtualBoard[0][0];
-    const rowNumber = figure.color == 'white' ? 7 : 0;
-    if (leftRook != null && leftRook.isMove == false && leftRook.type == 'rook' && leftRook.color == figure.color) {
-      const isEmpty = [1, 2, 3].every(index => {
-        const square = {x: index, y: rowNumber};
+    const leftRook =
+      figure.color == "white" ? virtualBoard[7][0] : virtualBoard[0][0];
+    const rowNumber = figure.color == "white" ? 7 : 0;
+    if (
+      leftRook != null &&
+      leftRook.isMove == false &&
+      leftRook.type == "rook" &&
+      leftRook.color == figure.color
+    ) {
+      const isEmpty = [1, 2, 3].every((index) => {
+        const square = { x: index, y: rowNumber };
 
-        return virtualBoard[square.y][square.x] == null && !isUnderAttack(figure.opColor, square);
+        return (
+          virtualBoard[square.y][square.x] == null &&
+          !isUnderAttack(figure.opColor, square)
+        );
       });
 
       if (isEmpty && !isUnderAttack(figure.opColor, figureCoord)) {
-        virtualActionBoard[rowNumber][0] = 'canCastling';
-        result.push({x: 0, y: rowNumber});
+        virtualActionBoard[rowNumber][0] = "canCastling";
+        result.push({ x: 0, y: rowNumber });
       }
     }
-    
-    const righRook = figure.color == 'white' ? virtualBoard[7][7] : virtualBoard[0][7];
-    if (righRook != null && righRook.isMove == false && righRook.type == 'rook' && righRook.color == figure.color) {
-      const isEmpty = [5, 6].every(index => {
-        const square = {x: index, y: rowNumber};
 
-        return virtualBoard[square.y][square.x] == null && !isUnderAttack(figure.opColor, square);
+    const righRook =
+      figure.color == "white" ? virtualBoard[7][7] : virtualBoard[0][7];
+    if (
+      righRook != null &&
+      righRook.isMove == false &&
+      righRook.type == "rook" &&
+      righRook.color == figure.color
+    ) {
+      const isEmpty = [5, 6].every((index) => {
+        const square = { x: index, y: rowNumber };
+
+        return (
+          virtualBoard[square.y][square.x] == null &&
+          !isUnderAttack(figure.opColor, square)
+        );
       });
 
       if (isEmpty && !isUnderAttack(figure.opColor, figureCoord)) {
-        virtualActionBoard[rowNumber][7] = 'canCastling';
-        result.push({x: 7, y: rowNumber});
+        virtualActionBoard[rowNumber][7] = "canCastling";
+        result.push({ x: 7, y: rowNumber });
       }
     }
   }
@@ -465,32 +487,34 @@ function isCastling (figureCoord) {
 //   selectedFigureSquare.classList.remove('not-go');
 // }
 
-function castling (squareCoord) {
-  const {x, y} = squareCoord;
+function castling(squareCoord) {
+  const { x, y } = squareCoord;
   const isLong = x == 0 ? true : false;
 
   if (isLong) {
-    imageMove(squareCoord, {x: parseInt(x) + 3, y: y}, 'move');
+    imageMove(squareCoord, { x: parseInt(x) + 3, y: y }, "move");
     virtualBoard[y][x].isMove = true;
     virtualBoard[y][parseInt(x) + 3] = virtualBoard[y][x];
     virtualBoard[y][x] = null;
     const kingSquare = findKing(moveTurn);
-    const newKingSquare = {x: kingSquare.x - 2, y: kingSquare.y};
+    const newKingSquare = { x: kingSquare.x - 2, y: kingSquare.y };
     virtualBoard[kingSquare.y][kingSquare.x].isMove = true;
-    virtualBoard[newKingSquare.y][newKingSquare.x] = virtualBoard[kingSquare.y][kingSquare.x];
+    virtualBoard[newKingSquare.y][newKingSquare.x] =
+      virtualBoard[kingSquare.y][kingSquare.x];
     virtualBoard[kingSquare.y][kingSquare.x] = null;
-    imageMove(kingSquare, newKingSquare, 'move');
+    imageMove(kingSquare, newKingSquare, "move");
   } else {
     virtualBoard[y][x].isMove = true;
     virtualBoard[y][parseInt(x) - 2] = virtualBoard[y][x];
     virtualBoard[y][x] = null;
-    imageMove(squareCoord, {x: parseInt(x) - 2, y: y}, 'move');
+    imageMove(squareCoord, { x: parseInt(x) - 2, y: y }, "move");
     const kingSquare = findKing(moveTurn);
-    const newKingSquare = {x: kingSquare.x + 2, y: kingSquare.y};
+    const newKingSquare = { x: kingSquare.x + 2, y: kingSquare.y };
     virtualBoard[kingSquare.y][kingSquare.x].isMove = true;
-    virtualBoard[newKingSquare.y][newKingSquare.x] = virtualBoard[kingSquare.y][kingSquare.x];
+    virtualBoard[newKingSquare.y][newKingSquare.x] =
+      virtualBoard[kingSquare.y][kingSquare.x];
     virtualBoard[kingSquare.y][kingSquare.x] = null;
-    imageMove(kingSquare, newKingSquare, 'move');
+    imageMove(kingSquare, newKingSquare, "move");
   }
 }
 //передаем клетку и цвет фигур которые ее атакуют.
@@ -634,79 +658,91 @@ function castling (squareCoord) {
   return result;
 }*/
 
-function check () {
-  if (moveTurn == 'black') {
-    const kingSquare = findKing('black');
-    if (isUnderAttack('white', kingSquare)) {
-      turnStatus.textContent += '. Шах';
-      document.querySelector(`#_${kingSquare.y}`).children[kingSquare.x].classList.add('highlight-check');
+function check() {
+  if (moveTurn == "black") {
+    const kingSquare = findKing("black");
+    if (isUnderAttack("white", kingSquare)) {
+      turnStatus.textContent += ". Шах";
+      document
+        .querySelector(`#_${kingSquare.y}`)
+        .children[kingSquare.x].classList.add("highlight-check");
     }
-  } else if (moveTurn == 'white') {
-    const kingSquare = findKing('white');
-    if (isUnderAttack('black', kingSquare)) {
-      turnStatus.textContent += '. Шах';
-      document.querySelector(`#_${kingSquare.y}`).children[kingSquare.x].classList.add('highlight-check');
+  } else if (moveTurn == "white") {
+    const kingSquare = findKing("white");
+    if (isUnderAttack("black", kingSquare)) {
+      turnStatus.textContent += ". Шах";
+      document
+        .querySelector(`#_${kingSquare.y}`)
+        .children[kingSquare.x].classList.add("highlight-check");
     }
   }
 }
 
 function showModal() {
-  const {x, y} = selectedTransformFigure;
-  const figuresTransformType = ['Bishop', 'Horse', 'Rook', 'Queen'];
+  const { x, y } = selectedTransformFigure;
+  const figuresTransformType = ["Bishop", "Horse", "Rook", "Queen"];
   const transformImg = document.querySelectorAll(".transformimg");
   let i = 0;
-  if (virtualBoard[y][x].color == 'white'){
+  if (virtualBoard[y][x].color == "white") {
     for (const img of transformImg) {
       img.src = `img/white/white${figuresTransformType[i]}.png`;
       i++;
     }
-  } else if (virtualBoard[y][x].color == 'black') {
+  } else if (virtualBoard[y][x].color == "black") {
     for (const img of transformImg) {
       img.src = `img/black/black${figuresTransformType[i]}.png`;
       i++;
     }
   }
-  modalOverlay.style.display = 'block';
-  pawnTransformContainer.style.display = 'block';
-  document.body.style.overflow = 'hidden';
+  modalOverlay.style.display = "block";
+  pawnTransformContainer.style.display = "block";
+  document.body.style.overflow = "hidden";
 }
 
 function hideModal() {
-  const {x, y} = selectedTransformFigure;
+  const { x, y } = selectedTransformFigure;
   let selectedTransformFigureColor = virtualBoard[y][x].color;
   const selectedTransformFigureRow = document.querySelector(`#_${y}`);
   const selectedTransformFigureSquare = selectedTransformFigureRow.children[x];
-  const selectedRadio = document.querySelector('input[name="figure"]:checked');  
+  const selectedRadio = document.querySelector('input[name="figure"]:checked');
   const selectedFigureType = selectedRadio.value;
 
-  let figure = document.createElement('img');
-  figure.setAttribute('src', `img/${selectedTransformFigureColor}/${selectedTransformFigureColor}${selectedFigureType}.png`);
+  let figure = document.createElement("img");
+  figure.setAttribute(
+    "src",
+    `img/${selectedTransformFigureColor}/${selectedTransformFigureColor}${selectedFigureType}.png`
+  );
   virtualBoard[y][x].type = selectedFigureType.toLowerCase();
-  selectedTransformFigureSquare.removeChild(selectedTransformFigureSquare.firstChild);
+  selectedTransformFigureSquare.removeChild(
+    selectedTransformFigureSquare.firstChild
+  );
   selectedTransformFigureSquare.appendChild(figure);
 
-  modalOverlay.style.display = 'none';
-  pawnTransformContainer.style.display = 'none';
-  document.body.style.overflow = '';
+  modalOverlay.style.display = "none";
+  pawnTransformContainer.style.display = "none";
+  document.body.style.overflow = "";
   //check();
   //checkMate();
 }
 
-function findKing (color) {
+function findKing(color) {
   for (let i = 0; i < 8; i++) {
-    for (let j = 0; j < 8; j++){
-      if (virtualBoard[i][j]?.type == 'king' && virtualBoard[i][j]?.color == color) {
-        return {x: j, y: i};
+    for (let j = 0; j < 8; j++) {
+      if (
+        virtualBoard[i][j]?.type == "king" &&
+        virtualBoard[i][j]?.color == color
+      ) {
+        return { x: j, y: i };
       }
     }
   }
   return false;
 }
 
-function checkMate () {
+function checkMate() {
   let result = false;
   const color = moveTurn;
-  const opColor = moveTurn == 'white' ? 'Чёрных' : "Белых";
+  const opColor = moveTurn == "white" ? "Чёрных" : "Белых";
   const allFigures = document.querySelectorAll(`.${color}`);
 
   for (const figure of allFigures) {
@@ -718,25 +754,25 @@ function checkMate () {
     }
   }
   setTimeout(() => {
-    turnStatus.textContent = 'Мат. Игра окончена.';
+    turnStatus.textContent = "Мат. Игра окончена.";
     alert(`Игра окончена. Победа ${opColor}`);
   }, 250);
-  turnStatus.textContent = 'game-over';
+  turnStatus.textContent = "game-over";
   return result;
 }
 
-function imageMove (startCoord, endCoord, flag = 'move') {
+function imageMove(startCoord, endCoord, flag = "move") {
   const imageStartRow = document.querySelector(`#_${startCoord.y}`);
   const imageStartSquare = imageStartRow.children[startCoord.x];
   const startImage = imageStartSquare.children[0];
 
   const imageEndRow = document.querySelector(`#_${endCoord.y}`);
   const imageEndSquare = imageEndRow.children[endCoord.x];
-  if (flag == 'eat') {
+  if (flag == "eat") {
     imageEndSquare.removeChild(imageEndSquare.firstChild);
   }
 
   imageEndSquare.appendChild(startImage);
 }
-confirmButton.addEventListener('click', hideModal);
+confirmButton.addEventListener("click", hideModal);
 //table.addEventListener('click', targetCell);
