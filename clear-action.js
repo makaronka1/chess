@@ -171,9 +171,11 @@ function turnSwap() {
 // }
 
 function highlightSelectedFigure(coord) {
-  const { x, y } = coord;
-  const row = document.querySelector(`#_${y}`);
-  row.children[x].classList.add("highlight-blue");
+  if (moveTurn == "black" || moveTurn == "white") {
+    const { x, y } = coord;
+    const row = document.querySelector(`#_${y}`);
+    row.children[x].classList.add("highlight-blue");
+  }
 }
 
 /*function searchAllAvailableSquares (target) {
@@ -762,7 +764,7 @@ function checkMate() {
     turnStatus.textContent = "Мат. Игра окончена.";
     alert(`Игра окончена. Победа ${opColor}`);
   }, 100);
-  turnStatus.textContent = "game-over";
+  moveTurn = "game-over";
   return result;
 }
 

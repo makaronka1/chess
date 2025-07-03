@@ -62,8 +62,9 @@ function targetCell(event) {
     clearVirtualActionBoard();
     removeHighlightedSquares();
     turnSwap();
-    check();
-    checkMate();
+    if (check()) {
+      checkMate();
+    }
   }
 
   if (
@@ -76,8 +77,9 @@ function targetCell(event) {
     clearVirtualActionBoard();
     removeHighlightedSquares();
     turnSwap();
-    check();
-    checkMate();
+    if (check()) {
+      checkMate();
+    }
   }
 
   if (
@@ -91,8 +93,9 @@ function targetCell(event) {
     clearVirtualActionBoard();
     removeHighlightedSquares();
     turnSwap();
-    check();
-    checkMate();
+    if (check()) {
+      checkMate();
+    }
   }
 }
 table.addEventListener("click", targetCell);
