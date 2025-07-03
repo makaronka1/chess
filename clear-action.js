@@ -146,6 +146,7 @@ function turnSwap() {
       console.log("Взятия на проходе нет.");
     }
     turnStatus.textContent = "Ход черных";
+    clearVirtualActionBoard();
   } else {
     moveTurn = "white";
     try {
@@ -156,6 +157,7 @@ function turnSwap() {
       console.log("Взятия на проходе нет.");
     }
     turnStatus.textContent = "Ход белых";
+    clearVirtualActionBoard();
   }
 }
 
@@ -755,6 +757,7 @@ function checkMate() {
         const moveSquares = searchMoveAvailable({ x: j, y: i });
         if (eatSquares.length != 0 || moveSquares.length != 0) {
           result = false;
+          clearVirtualActionBoard();
           return result;
         }
       }
