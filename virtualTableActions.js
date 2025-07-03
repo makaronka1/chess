@@ -13,9 +13,9 @@ function targetCell(event) {
   const { x, y } = squareInfo(square);
   //Если нажата на клетку с фигурой которая может ходить (её ход)
   if (virtualBoard[y][x] != null) {
-    clearVirtualActionBoard();
     const figure = virtualBoard[y][x];
     if (figure.color == moveTurn) {
+      clearVirtualActionBoard();
       removeHighlightedSquares();
       const squareCoord = squareInfo(square);
       selectedFigureSquare = squareCoord;
