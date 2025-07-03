@@ -63,6 +63,7 @@ function targetCell(event) {
     removeHighlightedSquares();
     turnSwap();
     check();
+    checkMate();
   }
 
   if (
@@ -70,14 +71,13 @@ function targetCell(event) {
     virtualActionBoard[y][x] == "canEat" &&
     selectedFigureSquare
   ) {
-    console.log("eat");
-    console.log(selectedFigureSquare);
     figureEat(selectedFigureSquare, squareInfo(square));
     removeHighlightedCheck();
     clearVirtualActionBoard();
     removeHighlightedSquares();
     turnSwap();
     check();
+    checkMate();
   }
 
   if (
@@ -92,6 +92,7 @@ function targetCell(event) {
     removeHighlightedSquares();
     turnSwap();
     check();
+    checkMate();
   }
 }
 table.addEventListener("click", targetCell);
@@ -242,7 +243,7 @@ function searchEatAvailable(coord) {
   const { x, y } = coord;
   console.log(coord);
   console.log(virtualBoard[y][x]);
-  const { color, type, isMove } = virtualBoard[y][x];
+  const { color, type, isMove, opColor } = virtualBoard[y][x];
   let directions;
   let squares = [];
   directions =
@@ -300,8 +301,18 @@ function searchEatAvailable(coord) {
       } else if (
         newSquare != null &&
         type != "pawn" &&
+        type != "king" &&
         canEat(newSquare, color) &&
         nextTurnSimulate({ x: x, y: y }, { x: newX, y: newY }, "eat")
+      ) {
+        squares.push({ x: newX, y: newY });
+        virtualActionBoard[newY][newX] = "canEat";
+        break;
+      } else if (
+        newSquare != null &&
+        type == "king" &&
+        canEat(newSquare, color) &&
+        !isUnderAttack(opColor, { x: newX, y: newY })
       ) {
         squares.push({ x: newX, y: newY });
         virtualActionBoard[newY][newX] = "canEat";

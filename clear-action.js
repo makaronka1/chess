@@ -410,11 +410,12 @@ function isCastling(figureCoord) {
   const { x, y } = figureCoord;
   const figure = virtualBoard[y][x];
   let result = [];
+
   if (
     figure.type != "king" ||
     figure.color != moveTurn ||
     figure.isMove != false ||
-    isUnderAttack(figure.opColor, figureCoord)
+    isUnderAttack(figure.opColor, findKing(moveTurn))
   ) {
     return;
   } else {
@@ -666,6 +667,7 @@ function check() {
       document
         .querySelector(`#_${kingSquare.y}`)
         .children[kingSquare.x].classList.add("highlight-check");
+      return true;
     }
   } else if (moveTurn == "white") {
     const kingSquare = findKing("white");
@@ -674,6 +676,7 @@ function check() {
       document
         .querySelector(`#_${kingSquare.y}`)
         .children[kingSquare.x].classList.add("highlight-check");
+      return true;
     }
   }
 }
@@ -721,8 +724,8 @@ function hideModal() {
   modalOverlay.style.display = "none";
   pawnTransformContainer.style.display = "none";
   document.body.style.overflow = "";
-  //check();
-  //checkMate();
+  check();
+  checkMate();
 }
 
 function findKing(color) {
@@ -740,23 +743,25 @@ function findKing(color) {
 }
 
 function checkMate() {
-  let result = false;
+  let result = true;
   const color = moveTurn;
   const opColor = moveTurn == "white" ? "Чёрных" : "Белых";
-  const allFigures = document.querySelectorAll(`.${color}`);
-
-  for (const figure of allFigures) {
-    const squares = searchAllAvailableSquares(figure);
-    if (squares[0].length != 0 || squares[1].length != 0) {
-      console.log(squares[0].length, squares[1].length);
-      result = true;
-      return result;
+  for (let i = 0; i < 8; i++) {
+    for (let j = 0; j < 8; j++) {
+      if (virtualBoard[i][j]?.color == color) {
+        const eatSquares = searchEatAvailable({ x: j, y: i });
+        const moveSquares = searchMoveAvailable({ x: j, y: i });
+        if (eatSquares.length != 0 || moveSquares.length != 0) {
+          result = false;
+          return result;
+        }
+      }
     }
   }
   setTimeout(() => {
     turnStatus.textContent = "Мат. Игра окончена.";
     alert(`Игра окончена. Победа ${opColor}`);
-  }, 250);
+  }, 100);
   turnStatus.textContent = "game-over";
   return result;
 }
