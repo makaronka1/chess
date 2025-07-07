@@ -267,12 +267,12 @@ const firstRow = document.querySelector("#_0");
 const lastRow = document.querySelector("#_7");
 
 function fillFigures() {
-  fillBishop();
-  fillHorse();
-  fillKing();
-  fillPawn();
-  fillQueen();
-  fillRook();
+  //fillBishop();
+  //fillHorse();
+  //fillKing();
+  //fillPawn();
+  //fillQueen();
+  //fillRook();
 }
 
 fillFigures();

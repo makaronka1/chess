@@ -49,10 +49,10 @@ let virtualActionBoard = Array(8)
   .map(() => Array(8).fill(null));
 
 function fillVirtualBoard() {
-  fillPawn();
-  fillHorse();
-  fillBishop();
+  //fillBishop();
+  //fillHorse();
   fillKing();
+  //fillPawn();
   fillQueen();
   fillRook();
 }
@@ -70,18 +70,28 @@ const server = http.createServer((req, res) => {
     const x = parseInt(urlParams.searchParams.get("x"));
     const y = parseInt(urlParams.searchParams.get("y"));
     const coordObject = { x: x, y: y };
-    if (virtualBoard[y][x]) {
-      const moveSquaresResult = searchMoveAvailable(coordObject);
-      const resultMassive = [coordObject, moveSquaresResult];
+    if (virtualBoard[y][x] && virtualBoard[y][x].color == moveTurn) {
+      const figure = virtualBoard[y][x];
+      let resultMassive = [];
+      let castlingSquares = [];
+      clearVirtualActionBoard();
+      selectedFigureSquare = coordObject;
+      const moveSquares = searchMoveAvailable(coordObject);
+      const eatSquares = searchEatAvailable(coordObject);
+      if (figure.type == "king") {
+        castlingSquares = isCastling(coordObject);
+      }
+      resultMassive = [coordObject, moveSquares, eatSquares, castlingSquares];
       res.statusCode = 200;
       res.setHeader("Content-Type", "application/json");
       res.setHeader("Access-Control-Allow-Origin", "*");
       res.end(JSON.stringify(resultMassive));
     } else {
       res.statusCode = 200;
+      selectedFigureSquare = null;
       res.setHeader("Content-Type", "application/json");
       res.setHeader("Access-Control-Allow-Origin", "*");
-      res.end(JSON.stringify("void square"));
+      res.end(JSON.stringify("void square или не цвет хода"));
     }
   } else {
     // Стандартный ответ для других URL
@@ -221,15 +231,6 @@ function canEat(square, attackerColor) {
   return square.color !== attackerColor;
 }
 
-function fillVirtualBoard() {
-  fillPawn();
-  fillHorse();
-  fillBishop();
-  fillKing();
-  fillQueen();
-  fillRook();
-}
-
 function searchMoveAvailable(coord) {
   const { x, y } = coord;
   const { color, type, isMove, opColor } = virtualBoard[y][x];
@@ -266,8 +267,8 @@ function searchMoveAvailable(coord) {
       if (newSquare === null) {
         if (type == "king" || type == "horse") {
           if (
-            type == "king" /*&&
-            !isUnderAttack(opColor, { x: newX, y: newY }) &&
+            type == "king" &&
+            !isUnderAttack(opColor, { x: newX, y: newY }) /*&&
             nextTurnSimulate({ x: x, y: y }, { x: newX, y: newY }, "move")*/
           ) {
             squares.push({ x: newX, y: newY });
@@ -322,6 +323,283 @@ function searchMoveAvailable(coord) {
   return squares;
 }
 
-fillVirtualBoard();
+function canEat(square, attackerColor) {
+  return square.color !== attackerColor;
+}
+
+function searchEatAvailable(coord) {
+  const { x, y } = coord;
+  console.log(coord);
+  console.log(virtualBoard[y][x]);
+  const { color, type, isMove, opColor } = virtualBoard[y][x];
+  let directions;
+  let squares = [];
+  directions =
+    type == "king" || type == "queen"
+      ? queenKingDirections
+      : type == "bishop"
+      ? bishopDirections
+      : type == "rook"
+      ? rookDirections
+      : type == "horse"
+      ? horseDirections
+      : false;
+  if (type == "pawn") {
+    directions = color == "black" ? blackPawnDirection : whitePawnDirection;
+  }
+  directions.forEach((direction) => {
+    let step = 1;
+
+    while (true) {
+      let newX = parseInt(x) + parseInt(direction.x * step);
+      let newY = parseInt(y) + parseInt(direction.y * step);
+      if (newY > 7 || newY < 0 || newX > 7 || newX < 0) {
+        break;
+      }
+
+      let newRow = virtualBoard[newY];
+      if (!newRow) break;
+
+      let newSquare = newRow[newX];
+
+      if (type == "pawn") {
+        if (
+          newRow[parseInt(newX) + 1] != null &&
+          canEat(newRow[parseInt(newX) + 1], color) /*&&
+          nextTurnSimulate({ x: x, y: y }, { x: newX + 1, y: newY }, "eat")*/
+        ) {
+          squares.push({ x: newX + 1, y: newY });
+          virtualActionBoard[newY][newX + 1] = "canEat";
+        }
+        if (
+          newRow[parseInt(newX) - 1] != null &&
+          canEat(newRow[parseInt(newX) - 1], color) /*&&
+          nextTurnSimulate({ x: x, y: y }, { x: newX - 1, y: newY }, "eat")*/
+        ) {
+          squares.push({ x: newX - 1, y: newY });
+          virtualActionBoard[newY][newX - 1] = "canEat";
+        }
+        break;
+      } else if (newSquare == null && type != "pawn") {
+        if (type == "king" || type == "horse") {
+          break;
+        } else {
+          step++;
+        }
+      } else if (
+        newSquare != null &&
+        type != "pawn" &&
+        type != "king" &&
+        canEat(newSquare, color) /*&&
+        nextTurnSimulate({ x: x, y: y }, { x: newX, y: newY }, "eat")*/
+      ) {
+        squares.push({ x: newX, y: newY });
+        virtualActionBoard[newY][newX] = "canEat";
+        break;
+      } else if (
+        newSquare != null &&
+        type == "king" &&
+        canEat(newSquare, color) &&
+        !isUnderAttack(opColor, { x: newX, y: newY })
+      ) {
+        squares.push({ x: newX, y: newY });
+        virtualActionBoard[newY][newX] = "canEat";
+        break;
+      } else if (
+        newSquare != null &&
+        type != "pawn" &&
+        !canEat(newSquare, color)
+      ) {
+        break;
+      } else {
+        break;
+      }
+    }
+  });
+
+  return squares;
+}
+
+function clearVirtualActionBoard() {
+  for (let y = 0; y < virtualActionBoard.length; y++) {
+    for (let x = 0; x < virtualActionBoard[y].length; x++) {
+      if (virtualActionBoard[y][x]) {
+        virtualActionBoard[y][x] = null;
+      }
+    }
+  }
+}
+
+function isUnderAttack(color, square) {
+  let isAttacked = false;
+  let allAttackSquares = [];
+  let allMoveSquares = [];
+  let allProtectedSquares = [];
+  for (let i = 0; i < 8; i++) {
+    for (let j = 0; j < 8; j++) {
+      if (virtualBoard[i][j]?.color == color) {
+        const { color, type } = virtualBoard[i][j];
+        let directions;
+        directions =
+          type == "king" || type == "queen"
+            ? queenKingDirections
+            : type == "bishop"
+            ? bishopDirections
+            : type == "rook"
+            ? rookDirections
+            : type == "horse"
+            ? horseDirections
+            : false;
+        if (type == "pawn") {
+          directions =
+            color == "black" ? blackPawnDirection : whitePawnDirection;
+        }
+        let x = j;
+        let y = i;
+        if (type != "pawn") {
+          directions.forEach((direction) => {
+            let step = 1;
+
+            while (true) {
+              let newX = parseInt(x) + parseInt(direction.x * step);
+              let newY = parseInt(y) + parseInt(direction.y * step);
+              if (newY > 7 || newY < 0 || newX > 7 || newX < 0) {
+                break;
+              }
+
+              let newRow = virtualBoard[newY];
+              if (!newRow) break;
+
+              let newSquare = newRow[newX];
+
+              if (newSquare == null) {
+                if (type == "king" || type == "horse") {
+                  allMoveSquares.push({ x: newX, y: newY });
+                  break;
+                } else {
+                  allMoveSquares.push({ x: newX, y: newY });
+                  step++;
+                }
+              } else if (newSquare.phantom == true) {
+                allMoveSquares.push({ x: newX, y: newY });
+                step++;
+              } else {
+                virtualBoard[newY][newX].color == color
+                  ? allProtectedSquares.push({ x: newX, y: newY })
+                  : allAttackSquares.push({ x: newX, y: newY });
+                break;
+              }
+            }
+          });
+        } else if (type == "pawn") {
+          let step = 1;
+          let newX = parseInt(x) + parseInt(directions[0].x * step);
+          let newY = parseInt(y) + parseInt(directions[0].y * step);
+          let newRow = virtualBoard[newY];
+
+          if (newRow[parseInt(newX) + 1] != null) {
+            allAttackSquares.push({ x: newX + 1, y: newY });
+          }
+          if (newRow[parseInt(newX) + 1] == null) {
+            allProtectedSquares.push({ x: newX + 1, y: newY });
+          }
+          if (newRow[parseInt(newX) - 1] != null) {
+            allAttackSquares.push({ x: newX - 1, y: newY });
+          }
+          if (newRow[parseInt(newX) - 1] == null) {
+            allAttackSquares.push({ x: newX - 1, y: newY });
+          }
+        }
+      }
+    }
+  }
+  const resultMassive = allMoveSquares
+    .concat(allProtectedSquares)
+    .concat(allAttackSquares);
+  for (let element of resultMassive) {
+    if (JSON.stringify(element) == JSON.stringify(square)) {
+      isAttacked = true;
+    }
+  }
+  return isAttacked;
+}
+
+function findKing(color) {
+  for (let i = 0; i < 8; i++) {
+    for (let j = 0; j < 8; j++) {
+      if (
+        virtualBoard[i][j]?.type == "king" &&
+        virtualBoard[i][j]?.color == color
+      ) {
+        return { x: j, y: i };
+      }
+    }
+  }
+  return false;
+}
+
+function isCastling(figureCoord) {
+  const { x, y } = figureCoord;
+  const figure = virtualBoard[y][x];
+  let result = [];
+
+  if (
+    figure.type != "king" ||
+    figure.color != moveTurn ||
+    figure.isMove != false ||
+    isUnderAttack(figure.opColor, findKing(moveTurn))
+  ) {
+    return;
+  } else {
+    const leftRook =
+      figure.color == "white" ? virtualBoard[7][0] : virtualBoard[0][0];
+    const rowNumber = figure.color == "white" ? 7 : 0;
+    if (
+      leftRook != null &&
+      leftRook.isMove == false &&
+      leftRook.type == "rook" &&
+      leftRook.color == figure.color
+    ) {
+      const isEmpty = [1, 2, 3].every((index) => {
+        const square = { x: index, y: rowNumber };
+
+        return (
+          virtualBoard[square.y][square.x] == null &&
+          !isUnderAttack(figure.opColor, square)
+        );
+      });
+
+      if (isEmpty && !isUnderAttack(figure.opColor, figureCoord)) {
+        virtualActionBoard[rowNumber][0] = "canCastling";
+        result.push({ x: 0, y: rowNumber });
+      }
+    }
+
+    const righRook =
+      figure.color == "white" ? virtualBoard[7][7] : virtualBoard[0][7];
+    if (
+      righRook != null &&
+      righRook.isMove == false &&
+      righRook.type == "rook" &&
+      righRook.color == figure.color
+    ) {
+      const isEmpty = [5, 6].every((index) => {
+        const square = { x: index, y: rowNumber };
+
+        return (
+          virtualBoard[square.y][square.x] == null &&
+          !isUnderAttack(figure.opColor, square)
+        );
+      });
+
+      if (isEmpty && !isUnderAttack(figure.opColor, figureCoord)) {
+        virtualActionBoard[rowNumber][7] = "canCastling";
+        result.push({ x: 7, y: rowNumber });
+      }
+    }
+  }
+
+  return result;
+}
 
 console.log(virtualBoard);

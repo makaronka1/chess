@@ -486,7 +486,34 @@ document.getElementById("getBoardBtn").addEventListener("click", async () => {
   try {
     const response = await fetch("http://localhost:3000/board");
     const board = await response.json();
-
+    console.log(typeof board);
+    for (let i = 0; i < 8; i++) {
+      for (let j = 0; j < 8; j++) {
+        if (board[i][j] != null) {
+          const { type, color } = board[i][j];
+          let row = document.querySelector(`#_${i}`);
+          if (row.children[j].hasChildNodes()) {
+            const imgClasses = row.children[j].children[0].className.split(" ");
+            if (color == imgClasses[0] && type == imgClasses[1]) {
+              break;
+            } else {
+              let figure = createFigure(
+                color,
+                type.slice(0, 1).toUpperCase() + type.slice(1, type.length)
+              );
+              row.children[j].removeChild(row.children[j].firstChild);
+              row.children[j].appendChild(figure);
+            }
+          } else {
+            let figure = createFigure(
+              color,
+              type.slice(0, 1).toUpperCase() + type.slice(1, type.length)
+            );
+            row.children[j].appendChild(figure);
+          }
+        }
+      }
+    }
     console.log("Получена доска:", board);
   } catch (error) {
     console.error("Ошибка:", error);
@@ -507,9 +534,22 @@ async function targetCell(event) {
     removeHighlightedSquares();
     const response = await fetch(`http://localhost:3000/square?x=${x}&y=${y}`);
     const availableSquares = await response.json();
-    if (typeof availableSquares == "object") {
-      highlightSelectedFigure(availableSquares[0]);
-      highlightAvailableMoveSquares(availableSquares[1]);
+    if (
+      typeof availableSquares == "object" &&
+      availableSquares != "void square"
+    ) {
+      if (availableSquares[0].length != 0) {
+        highlightSelectedFigure(availableSquares[0]);
+      }
+      if (availableSquares[1].length != 0) {
+        highlightAvailableMoveSquares(availableSquares[1]);
+      }
+      if (availableSquares[2].length != 0) {
+        highlightAvailableEatSquares(availableSquares[2]);
+      }
+      if (availableSquares[3].length != 0) {
+        highlightAvailableMoveSquares(availableSquares[3]);
+      }
     }
     console.log("Получена фигура:", availableSquares);
   } catch (error) {
