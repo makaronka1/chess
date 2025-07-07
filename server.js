@@ -268,15 +268,15 @@ function searchMoveAvailable(coord) {
         if (type == "king" || type == "horse") {
           if (
             type == "king" &&
-            !isUnderAttack(opColor, { x: newX, y: newY }) /*&&
-            nextTurnSimulate({ x: x, y: y }, { x: newX, y: newY }, "move")*/
+            !isUnderAttack(opColor, { x: newX, y: newY }) &&
+            nextTurnSimulate({ x: x, y: y }, { x: newX, y: newY }, "move")
           ) {
             squares.push({ x: newX, y: newY });
             virtualActionBoard[newY][newX] = "canMove";
             break;
           } else if (
-            type == "horse" /* &&
-            nextTurnSimulate({ x: x, y: y }, { x: newX, y: newY }, "move")*/
+            type == "horse" &&
+            nextTurnSimulate({ x: x, y: y }, { x: newX, y: newY }, "move")
           ) {
             squares.push({ x: newX, y: newY });
             virtualActionBoard[newY][newX] = "canMove";
@@ -288,15 +288,14 @@ function searchMoveAvailable(coord) {
           const startRow = directions == blackPawnDirection ? 1 : 6;
           if (
             startRow == y &&
-            step < 2 /* &&
-            nextTurnSimulate({ x: x, y: y }, { x: newX, y: newY }, "move")*/
+            step < 2 &&
+            nextTurnSimulate({ x: x, y: y }, { x: newX, y: newY }, "move")
           ) {
             squares.push({ x: newX, y: newY });
             virtualActionBoard[newY][newX] = "canMove";
             step++;
           } else if (
-            true
-            /*nextTurnSimulate({ x: x, y: y }, { x: newX, y: newY }, "move")*/
+            nextTurnSimulate({ x: x, y: y }, { x: newX, y: newY }, "move")
           ) {
             squares.push({ x: newX, y: newY });
             virtualActionBoard[newY][newX] = "canMove";
@@ -305,8 +304,7 @@ function searchMoveAvailable(coord) {
             break;
           }
         } else if (
-          true
-          /*nextTurnSimulate({ x: x, y: y }, { x: newX, y: newY }, "move")*/
+          nextTurnSimulate({ x: x, y: y }, { x: newX, y: newY }, "move")
         ) {
           squares.push({ x: newX, y: newY });
           virtualActionBoard[newY][newX] = "canMove";
@@ -365,16 +363,16 @@ function searchEatAvailable(coord) {
       if (type == "pawn") {
         if (
           newRow[parseInt(newX) + 1] != null &&
-          canEat(newRow[parseInt(newX) + 1], color) /*&&
-          nextTurnSimulate({ x: x, y: y }, { x: newX + 1, y: newY }, "eat")*/
+          canEat(newRow[parseInt(newX) + 1], color) &&
+          nextTurnSimulate({ x: x, y: y }, { x: newX + 1, y: newY }, "eat")
         ) {
           squares.push({ x: newX + 1, y: newY });
           virtualActionBoard[newY][newX + 1] = "canEat";
         }
         if (
           newRow[parseInt(newX) - 1] != null &&
-          canEat(newRow[parseInt(newX) - 1], color) /*&&
-          nextTurnSimulate({ x: x, y: y }, { x: newX - 1, y: newY }, "eat")*/
+          canEat(newRow[parseInt(newX) - 1], color) &&
+          nextTurnSimulate({ x: x, y: y }, { x: newX - 1, y: newY }, "eat")
         ) {
           squares.push({ x: newX - 1, y: newY });
           virtualActionBoard[newY][newX - 1] = "canEat";
@@ -390,8 +388,8 @@ function searchEatAvailable(coord) {
         newSquare != null &&
         type != "pawn" &&
         type != "king" &&
-        canEat(newSquare, color) /*&&
-        nextTurnSimulate({ x: x, y: y }, { x: newX, y: newY }, "eat")*/
+        canEat(newSquare, color) &&
+        nextTurnSimulate({ x: x, y: y }, { x: newX, y: newY }, "eat")
       ) {
         squares.push({ x: newX, y: newY });
         virtualActionBoard[newY][newX] = "canEat";
@@ -600,6 +598,52 @@ function isCastling(figureCoord) {
   }
 
   return result;
+}
+
+function createInvisibleClone(figure) {
+  const { x, y } = figure;
+  let clone = { ...virtualBoard[y][x] };
+
+  return clone;
+}
+
+function nextTurnSimulate(figureCoord, squareCoord, action) {
+  let result = false;
+  const { color, opColor, type } = figureInfo(figureCoord);
+  if (action == "move" && type == "king") {
+    virtualBoard[figureCoord.y][figureCoord.x].phantom = true;
+    result = !isUnderAttack(opColor, squareCoord);
+  } else if (action == "move" && type != "king") {
+    const clone = createInvisibleClone(figureCoord);
+    virtualBoard[figureCoord.y][figureCoord.x].phantom = true;
+    virtualBoard[squareCoord.y][squareCoord.x] = clone;
+    const king = findKing(color);
+    result = !isUnderAttack(opColor, king);
+    virtualBoard[squareCoord.y][squareCoord.x] = null;
+  } else if (action == "eat" && type != "king") {
+    const king = findKing(color);
+    let eatbleFigure = { ...virtualBoard[squareCoord.y][squareCoord.x] };
+    virtualBoard[squareCoord.y][squareCoord.x] = figureInfo(figureCoord);
+    virtualBoard[figureCoord.y][figureCoord.x].phantom = true;
+    result = !isUnderAttack(opColor, king);
+    virtualBoard[squareCoord.y][squareCoord.x] = eatbleFigure;
+  }
+  virtualBoard[figureCoord.y][figureCoord.x].phantom = false;
+  return result;
+}
+
+function figureInfo(coord) {
+  const { x, y } = coord;
+  const figure = virtualBoard[y][x];
+  const { color, type, isMove, phantom, opColor } = figure;
+
+  return {
+    color: color,
+    type: type,
+    isMove: isMove,
+    phantom: phantom,
+    opColor: opColor,
+  };
 }
 
 console.log(virtualBoard);
