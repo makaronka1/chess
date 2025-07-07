@@ -99,7 +99,7 @@ function targetCell(event) {
     }
   }
 }
-table.addEventListener("click", targetCell);
+//table.addEventListener("click", targetCell);
 
 function squareInfo(square) {
   const eventTargetRow = square.parentElement;
@@ -481,3 +481,39 @@ function nextTurnSimulate(figureCoord, squareCoord, action) {
   virtualBoard[figureCoord.y][figureCoord.x].phantom = false;
   return result;
 }
+
+document.getElementById("getBoardBtn").addEventListener("click", async () => {
+  try {
+    const response = await fetch("http://localhost:3000/board");
+    const board = await response.json();
+
+    console.log("Получена доска:", board);
+  } catch (error) {
+    console.error("Ошибка:", error);
+  }
+});
+
+async function targetCell(event) {
+  let square;
+  const target = event.target;
+  if (target.classList.contains("cube")) {
+    square = target;
+  } else {
+    square = target.parentElement;
+  }
+  const { x, y } = squareInfo(square);
+  console.log(squareInfo(square));
+  try {
+    removeHighlightedSquares();
+    const response = await fetch(`http://localhost:3000/square?x=${x}&y=${y}`);
+    const availableSquares = await response.json();
+    if (typeof availableSquares == "object") {
+      highlightSelectedFigure(availableSquares[0]);
+      highlightAvailableMoveSquares(availableSquares[1]);
+    }
+    console.log("Получена фигура:", availableSquares);
+  } catch (error) {
+    console.error("Ошибка:", error);
+  }
+}
+table.addEventListener("click", targetCell);
