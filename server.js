@@ -86,12 +86,40 @@ const server = http.createServer((req, res) => {
       res.setHeader("Content-Type", "application/json");
       res.setHeader("Access-Control-Allow-Origin", "*");
       res.end(JSON.stringify(resultMassive));
-    } else {
+    } // else {
+    //   res.statusCode = 200;
+    //   selectedFigureSquare = null;
+    //   res.setHeader("Content-Type", "application/json");
+    //   res.setHeader("Access-Control-Allow-Origin", "*");
+    //   res.end(JSON.stringify("void square или не цвет хода"));
+    // }
+    if (
+      virtualBoard[y][x] == null &&
+      virtualActionBoard[y][x] == "canMove" &&
+      selectedFigureSquare
+    ) {
+      figureMove(selectedFigureSquare, coordObject);
+      //Трансформация пешки
+      /*if (
+        (squareInfo(square).y == 7 || squareInfo(square).y == 0) &&
+        virtualBoard[selectedFigureSquare.y][selectedFigureSquare.x].type ==
+          "pawn"
+      ) {
+        selectedTransformFigure = squareInfo(square);
+        showModal();
+        virtualBoard[selectedFigureSquare.y][selectedFigureSquare.x] = null;
+      }*/
+      virtualBoard[selectedFigureSquare.y][selectedFigureSquare.x] = null;
+      clearVirtualActionBoard();
       res.statusCode = 200;
       selectedFigureSquare = null;
       res.setHeader("Content-Type", "application/json");
       res.setHeader("Access-Control-Allow-Origin", "*");
-      res.end(JSON.stringify("void square или не цвет хода"));
+      res.end(JSON.stringify("ход"));
+      // turnSwap();
+      // if (check()) {
+      //   checkMate();
+      // }
     }
   } else {
     // Стандартный ответ для других URL
@@ -547,7 +575,7 @@ function isCastling(figureCoord) {
     figure.isMove != false ||
     isUnderAttack(figure.opColor, findKing(moveTurn))
   ) {
-    return;
+    return result;
   } else {
     const leftRook =
       figure.color == "white" ? virtualBoard[7][0] : virtualBoard[0][0];
@@ -644,6 +672,12 @@ function figureInfo(coord) {
     phantom: phantom,
     opColor: opColor,
   };
+}
+
+function figureMove(startCoord, endCoord) {
+  const figure = virtualBoard[startCoord.y][startCoord.x];
+  virtualBoard[endCoord.y][endCoord.x] = figure;
+  virtualBoard[endCoord.y][endCoord.x].isMove = true;
 }
 
 console.log(virtualBoard);

@@ -486,35 +486,27 @@ document.getElementById("getBoardBtn").addEventListener("click", async () => {
   try {
     const response = await fetch("http://localhost:3000/board");
     const board = await response.json();
-    console.log(typeof board);
+
     for (let i = 0; i < 8; i++) {
       for (let j = 0; j < 8; j++) {
+        const cell = document.querySelector(`#_${i}`).children[j];
+
+        while (cell.firstChild) {
+          cell.removeChild(cell.firstChild);
+        }
+
         if (board[i][j] != null) {
           const { type, color } = board[i][j];
-          let row = document.querySelector(`#_${i}`);
-          if (row.children[j].hasChildNodes()) {
-            const imgClasses = row.children[j].children[0].className.split(" ");
-            if (color == imgClasses[0] && type == imgClasses[1]) {
-              break;
-            } else {
-              let figure = createFigure(
-                color,
-                type.slice(0, 1).toUpperCase() + type.slice(1, type.length)
-              );
-              row.children[j].removeChild(row.children[j].firstChild);
-              row.children[j].appendChild(figure);
-            }
-          } else {
-            let figure = createFigure(
-              color,
-              type.slice(0, 1).toUpperCase() + type.slice(1, type.length)
-            );
-            row.children[j].appendChild(figure);
-          }
+          const figure = createFigure(
+            color,
+            type.charAt(0).toUpperCase() + type.slice(1)
+          );
+          cell.appendChild(figure);
         }
       }
     }
-    console.log("Получена доска:", board);
+
+    console.log("Доска обновлена:", board);
   } catch (error) {
     console.error("Ошибка:", error);
   }
