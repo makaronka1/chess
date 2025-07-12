@@ -1,5 +1,5 @@
 console.log(virtualBoard);
-
+const socket = new WebSocket('ws://localhost:3000');
 function findVirtualBoardSquare(square) {}
 
 function targetCell(event) {
@@ -522,13 +522,48 @@ async function targetCell(event) {
   }
   const { x, y } = squareInfo(square);
   console.log(squareInfo(square));
+  const coord = squareInfo(square);
   try {
     removeHighlightedSquares();
-    const response = await fetch(`http://localhost:3000/square?x=${x}&y=${y}`);
-    const availableSquares = await response.json();
+    const response = JSON.stringify(
+      {type: "SQUARE",
+      data: coord}
+    );
+    socket.send(response);
+  } catch (error) {
+    console.error("Ошибка:", error);
+  }
+}
+table.addEventListener("click", targetCell);
+
+
+socket.onmessage = (event) => {
+  const message = JSON.parse(event.data);
+  console.log(message);
+  if (message.type === 'BOARD') {
+    for (let i = 0; i < 8; i++) {
+      for (let j = 0; j < 8; j++) {
+        const cell = document.querySelector(`#_${i}`).children[j];
+
+        while (cell.firstChild) {
+          cell.removeChild(cell.firstChild);
+        }
+
+        if (message.data[i][j] != null) {
+          const { type, color } = message.data[i][j];
+          const figure = createFigure(
+            color,
+            type.charAt(0).toUpperCase() + type.slice(1)
+          );
+          cell.appendChild(figure);
+        }
+      }
+    }
+  } else if (message.type === 'AVAILABLE_SQUARES') {
+    const availableSquares = message.data;
     if (
-      typeof availableSquares == "object" &&
-      availableSquares != "void square"
+      typeof message.data == "object" &&
+      message.data != "void square"
     ) {
       if (availableSquares[0].length != 0) {
         highlightSelectedFigure(availableSquares[0]);
@@ -544,8 +579,9 @@ async function targetCell(event) {
       }
     }
     console.log("Получена фигура:", availableSquares);
-  } catch (error) {
-    console.error("Ошибка:", error);
+  } else if (message.type == "NOTIFICATION") {
+    console.log(message.data);
+  } else if (message.type == "TURN") {
+    turnSwap(message.data);
   }
-}
-table.addEventListener("click", targetCell);
+};

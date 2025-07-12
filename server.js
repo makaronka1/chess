@@ -1,5 +1,18 @@
-const http = require("http");
+const express = require('express');
+const http = require('http');
+const WebSocket = require('ws');
 
+const app = express();
+const server = http.createServer(app);
+const wss = new WebSocket.Server({ server });
+
+// Middleware
+app.use(express.static('public'));
+app.use(express.json());
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  next();
+});
 let selectedFigureSquare;
 let selectedTransformFigure;
 
@@ -58,84 +71,190 @@ function fillVirtualBoard() {
 }
 fillVirtualBoard();
 
-const server = http.createServer((req, res) => {
-  if (req.url === "/board") {
-    // Возвращаем virtualBoard в формате JSON
-    res.statusCode = 200;
-    res.setHeader("Content-Type", "application/json");
-    res.setHeader("Access-Control-Allow-Origin", "*"); // Для кросс-доменных запросов
-    res.end(JSON.stringify(virtualBoard));
-  } else if (req.url.startsWith("/square")) {
-    const urlParams = new URL(req.url, `http://${req.headers.host}`);
-    const x = parseInt(urlParams.searchParams.get("x"));
-    const y = parseInt(urlParams.searchParams.get("y"));
-    const coordObject = { x: x, y: y };
-    if (virtualBoard[y][x] && virtualBoard[y][x].color == moveTurn) {
-      const figure = virtualBoard[y][x];
-      let resultMassive = [];
-      let castlingSquares = [];
-      clearVirtualActionBoard();
-      selectedFigureSquare = coordObject;
-      const moveSquares = searchMoveAvailable(coordObject);
-      const eatSquares = searchEatAvailable(coordObject);
-      if (figure.type == "king") {
-        castlingSquares = isCastling(coordObject);
-      }
-      resultMassive = [coordObject, moveSquares, eatSquares, castlingSquares];
-      res.statusCode = 200;
-      res.setHeader("Content-Type", "application/json");
-      res.setHeader("Access-Control-Allow-Origin", "*");
-      res.end(JSON.stringify(resultMassive));
-    } // else {
-    //   res.statusCode = 200;
-    //   selectedFigureSquare = null;
-    //   res.setHeader("Content-Type", "application/json");
-    //   res.setHeader("Access-Control-Allow-Origin", "*");
-    //   res.end(JSON.stringify("void square или не цвет хода"));
-    // }
-    if (
-      virtualBoard[y][x] == null &&
-      virtualActionBoard[y][x] == "canMove" &&
-      selectedFigureSquare
-    ) {
-      figureMove(selectedFigureSquare, coordObject);
-      //Трансформация пешки
-      /*if (
-        (squareInfo(square).y == 7 || squareInfo(square).y == 0) &&
-        virtualBoard[selectedFigureSquare.y][selectedFigureSquare.x].type ==
-          "pawn"
-      ) {
-        selectedTransformFigure = squareInfo(square);
-        showModal();
-        virtualBoard[selectedFigureSquare.y][selectedFigureSquare.x] = null;
-      }*/
-      virtualBoard[selectedFigureSquare.y][selectedFigureSquare.x] = null;
-      clearVirtualActionBoard();
-      res.statusCode = 200;
-      selectedFigureSquare = null;
-      res.setHeader("Content-Type", "application/json");
-      res.setHeader("Access-Control-Allow-Origin", "*");
-      res.end(JSON.stringify("ход"));
-      // turnSwap();
-      // if (check()) {
-      //   checkMate();
-      // }
-    }
-  } else {
-    // Стандартный ответ для других URL
-    res.statusCode = 200;
-    res.setHeader("Content-Type", "text/plain");
-    res.end(
-      "Привет, это мой локальный сервер на Node.js! Для получения доски перейдите на /board"
-    );
-  }
+
+// const server = http.createServer((req, res) => {
+//   if (req.url === "/board") {
+//     // Возвращаем virtualBoard в формате JSON
+//     res.statusCode = 200;
+//     res.setHeader("Content-Type", "application/json");
+//     res.setHeader("Access-Control-Allow-Origin", "*"); // Для кросс-доменных запросов
+//     res.end(JSON.stringify(virtualBoard));
+//   } else if (req.url.startsWith("/square")) {
+//     const urlParams = new URL(req.url, `http://${req.headers.host}`);
+//     const x = parseInt(urlParams.searchParams.get("x"));
+//     const y = parseInt(urlParams.searchParams.get("y"));
+//     const coordObject = { x: x, y: y };
+//     if (virtualBoard[y][x] && virtualBoard[y][x].color == moveTurn) {
+//       const figure = virtualBoard[y][x];
+//       let resultMassive = [];
+//       let castlingSquares = [];
+//       clearVirtualActionBoard();
+//       selectedFigureSquare = coordObject;
+//       const moveSquares = searchMoveAvailable(coordObject);
+//       const eatSquares = searchEatAvailable(coordObject);
+//       if (figure.type == "king") {
+//         castlingSquares = isCastling(coordObject);
+//       }
+//       resultMassive = [coordObject, moveSquares, eatSquares, castlingSquares];
+//       res.statusCode = 200;
+//       res.setHeader("Content-Type", "application/json");
+//       res.setHeader("Access-Control-Allow-Origin", "*");
+//       res.end(JSON.stringify(resultMassive));
+//     } // else {
+//     //   res.statusCode = 200;
+//     //   selectedFigureSquare = null;
+//     //   res.setHeader("Content-Type", "application/json");
+//     //   res.setHeader("Access-Control-Allow-Origin", "*");
+//     //   res.end(JSON.stringify("void square или не цвет хода"));
+//     // }
+//     if (
+//       virtualBoard[y][x] == null &&
+//       virtualActionBoard[y][x] == "canMove" &&
+//       selectedFigureSquare
+//     ) {
+//       figureMove(selectedFigureSquare, coordObject);
+//       //Трансформация пешки
+//       /*if (
+//         (squareInfo(square).y == 7 || squareInfo(square).y == 0) &&
+//         virtualBoard[selectedFigureSquare.y][selectedFigureSquare.x].type ==
+//           "pawn"
+//       ) {
+//         selectedTransformFigure = squareInfo(square);
+//         showModal();
+//         virtualBoard[selectedFigureSquare.y][selectedFigureSquare.x] = null;
+//       }*/
+//       virtualBoard[selectedFigureSquare.y][selectedFigureSquare.x] = null;
+//       clearVirtualActionBoard();
+//       res.statusCode = 200;
+//       selectedFigureSquare = null;
+//       res.setHeader("Content-Type", "application/json");
+//       res.setHeader("Access-Control-Allow-Origin", "*");
+//       res.end(JSON.stringify("ход"));
+//       // turnSwap();
+//       // if (check()) {
+//       //   checkMate();
+//       // }
+//     }
+//   } else {
+//     // Стандартный ответ для других URL
+//     res.statusCode = 200;
+//     res.setHeader("Content-Type", "text/plain");
+//     res.end(
+//       "Привет, это мой локальный сервер на Node.js! Для получения доски перейдите на /board"
+//     );
+//   }
+// });
+
+server.listen(3000, () => {
+  console.log('Сервер запущен на порту 3000');
 });
 
-const PORT = 3000;
-server.listen(PORT, () => {
-  console.log(`Сервер запущен на http://localhost:${PORT}/`);
-  console.log("Доска доступна по адресу http://localhost:3000/board");
+wss.on('connection', (ws) => {
+  ws.send(JSON.stringify({
+    type: "BOARD",
+    data: virtualBoard}));
+
+  function turnSwap() {
+  if (moveTurn == "white") {
+    moveTurn = "black";
+    clearVirtualActionBoard();
+    ws.send(JSON.stringify({
+      type: 'TURN',
+      data: "BLACK"
+    }))
+  } else {
+    moveTurn = "white";
+    clearVirtualActionBoard();
+    ws.send(JSON.stringify({
+      type: 'TURN',
+      data: "WHITE"
+    }))
+  }
+  }
+
+  ws.on('message', (message) => {
+    //console.log(message);
+    try {
+      const { type, data } = JSON.parse(message);
+      if (type == 'SQUARE') {
+        const x = data.x;
+        const y = data.y;
+        const coordObject = { x: x, y: y };
+        if (virtualBoard[y][x] && virtualBoard[y][x].color == moveTurn) {
+          const figure = virtualBoard[y][x];
+          let resultMassive = [];
+          let castlingSquares = [];
+          clearVirtualActionBoard();
+          selectedFigureSquare = coordObject;
+          const moveSquares = searchMoveAvailable(coordObject);
+          const eatSquares = searchEatAvailable(coordObject);
+          if (figure.type == "king") {
+            castlingSquares = isCastling(coordObject);
+          }
+          resultMassive = [coordObject, moveSquares, eatSquares, castlingSquares];
+          ws.send(JSON.stringify({
+            type: "AVAILABLE_SQUARES",
+            data: resultMassive
+          }))
+        } else {
+          ws.send(JSON.stringify({
+            type: "NOTIFICATION",
+            data: "void square или не цвет хода"
+          }))
+        }
+        if (
+          virtualBoard[y][x] == null &&
+          virtualActionBoard[y][x] == "canMove" &&
+          selectedFigureSquare
+        ) {
+          figureMove(selectedFigureSquare, coordObject);
+          //Трансформация пешки
+          /*if (
+            (squareInfo(square).y == 7 || squareInfo(square).y == 0) &&
+            virtualBoard[selectedFigureSquare.y][selectedFigureSquare.x].type ==
+              "pawn"
+          ) {
+            selectedTransformFigure = squareInfo(square);
+            showModal();
+            virtualBoard[selectedFigureSquare.y][selectedFigureSquare.x] = null;
+          }*/
+          virtualBoard[selectedFigureSquare.y][selectedFigureSquare.x] = null;
+          clearVirtualActionBoard();
+          selectedFigureSquare = null;
+          broadcastBoardState();
+          turnSwap();
+          if (check()) {
+            checkMate();
+          }
+        }
+      }
+
+      if (type === 'GET_BOARD') {
+        ws.send(JSON.stringify({
+            type: "BOARD",
+            data: virtualBoard
+          }))
+      }
+    } catch (e) {
+      console.error('Ошибка обработки сообщения:', e);
+    }
 });
+});
+
+
+
+function broadcastBoardState() {
+  const message = JSON.stringify({
+    type: 'BOARD',
+    data: virtualBoard
+  });
+
+  wss.clients.forEach(client => {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(message);
+    }
+  });
+}
 
 function fillPawn() {
   for (let i = 0; i < 8; i++) {
@@ -355,8 +474,6 @@ function canEat(square, attackerColor) {
 
 function searchEatAvailable(coord) {
   const { x, y } = coord;
-  console.log(coord);
-  console.log(virtualBoard[y][x]);
   const { color, type, isMove, opColor } = virtualBoard[y][x];
   let directions;
   let squares = [];
@@ -680,4 +797,17 @@ function figureMove(startCoord, endCoord) {
   virtualBoard[endCoord.y][endCoord.x].isMove = true;
 }
 
-console.log(virtualBoard);
+
+function check() {
+  if (moveTurn == "black") {
+    const kingSquare = findKing("black");
+    if (isUnderAttack("white", kingSquare)) {
+      return true;
+    }
+  } else if (moveTurn == "white") {
+    const kingSquare = findKing("white");
+    if (isUnderAttack("black", kingSquare)) {
+      return true;
+    }
+  }
+}
