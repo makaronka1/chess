@@ -583,5 +583,10 @@ socket.onmessage = (event) => {
     console.log(message.data);
   } else if (message.type == "TURN") {
     turnSwap(message.data);
+    removeHighlightedCheck();
+  } else if (message.type == "CHECK") {
+    check(message.color, message.data);
+  } else if (message.type == "CHECKMATE") {
+    checkMate(message.color);
   }
 };

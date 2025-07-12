@@ -645,25 +645,20 @@ function castling(squareCoord) {
   return result;
 }*/
 
-function check() {
-  if (moveTurn == "black") {
-    const kingSquare = findKing("black");
-    if (isUnderAttack("white", kingSquare)) {
-      turnStatus.textContent += ". Шах";
-      document
-        .querySelector(`#_${kingSquare.y}`)
-        .children[kingSquare.x].classList.add("highlight-check");
-      return true;
-    }
+function check(color, square) {
+  const kingSquare = square;
+  if (color == "black") {
+    turnStatus.textContent += ". Шах";
+    document
+      .querySelector(`#_${kingSquare.y}`)
+      .children[kingSquare.x].classList.add("highlight-check");
+    return true;
   } else if (moveTurn == "white") {
-    const kingSquare = findKing("white");
-    if (isUnderAttack("black", kingSquare)) {
-      turnStatus.textContent += ". Шах";
-      document
-        .querySelector(`#_${kingSquare.y}`)
-        .children[kingSquare.x].classList.add("highlight-check");
-      return true;
-    }
+    turnStatus.textContent += ". Шах";
+    document
+      .querySelector(`#_${kingSquare.y}`)
+      .children[kingSquare.x].classList.add("highlight-check");
+    return true;
   }
 }
 
@@ -728,28 +723,12 @@ function findKing(color) {
   return false;
 }
 
-function checkMate() {
-  let result = true;
-  const color = moveTurn;
-  const opColor = moveTurn == "white" ? "Чёрных" : "Белых";
-  for (let i = 0; i < 8; i++) {
-    for (let j = 0; j < 8; j++) {
-      if (virtualBoard[i][j]?.color == color) {
-        const eatSquares = searchEatAvailable({ x: j, y: i });
-        const moveSquares = searchMoveAvailable({ x: j, y: i });
-        if (eatSquares.length != 0 || moveSquares.length != 0) {
-          result = false;
-          clearVirtualActionBoard();
-          return result;
-        }
-      }
-    }
-  }
+function checkMate(color) {
+  const opColor = color == "white" ? "Чёрных" : "Белых";
   setTimeout(() => {
     turnStatus.textContent = "Мат. Игра окончена.";
     alert(`Игра окончена. Победа ${opColor}`);
   }, 100);
-  moveTurn = "game-over";
   return result;
 }
 

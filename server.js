@@ -196,12 +196,34 @@ wss.on('connection', (ws) => {
             type: "AVAILABLE_SQUARES",
             data: resultMassive
           }))
-        } else {
-          ws.send(JSON.stringify({
-            type: "NOTIFICATION",
-            data: "void square или не цвет хода"
-          }))
         }
+
+        if (
+          virtualBoard[y][x] !== null &&
+          virtualActionBoard[y][x] == "canEat" &&
+          selectedFigureSquare
+        ) {
+          figureEat(selectedFigureSquare, coordObject);
+          clearVirtualActionBoard();
+          broadcastBoardState();
+          turnSwap();
+          if (check()) {
+            if(!checkMate()) {
+              ws.send(JSON.stringify({
+                type: 'CHECK',
+                data: findKing(moveTurn),
+                color: moveTurn
+              }))
+            } else {
+              ws.send(JSON.stringify({
+                type: 'CHECKMATE',
+                data: findKing(moveTurn),
+                color: moveTurn
+              }))
+            }
+          }
+        }
+
         if (
           virtualBoard[y][x] == null &&
           virtualActionBoard[y][x] == "canMove" &&
@@ -224,8 +246,25 @@ wss.on('connection', (ws) => {
           broadcastBoardState();
           turnSwap();
           if (check()) {
-            checkMate();
+            if(!checkMate()) {
+              ws.send(JSON.stringify({
+                type: 'CHECK',
+                data: findKing(moveTurn),
+                color: moveTurn
+              }))
+            } else {
+              ws.send(JSON.stringify({
+                type: 'CHECKMATE',
+                data: findKing(moveTurn),
+                color: moveTurn
+              }))
+            }
           }
+        }
+
+        if (virtualActionBoard[y][x] == null && virtualBoard[y][x] == null) {
+          clearVirtualActionBoard();
+          selectedFigureSquare = null;
         }
       }
 
@@ -456,8 +495,10 @@ function searchMoveAvailable(coord) {
           squares.push({ x: newX, y: newY });
           virtualActionBoard[newY][newX] = "canMove";
           step++;
-        } else {
-          break;
+        } else if (
+          !nextTurnSimulate({ x: x, y: y }, { x: newX, y: newY }, "move")
+        ) {
+          step++;
         }
       } else {
         break;
@@ -810,4 +851,36 @@ function check() {
       return true;
     }
   }
+}
+
+function figureEat(startCoord, endCoord) {
+  const figure = virtualBoard[startCoord.y][startCoord.x];
+  virtualBoard[endCoord.y][endCoord.x] = figure;
+  virtualBoard[endCoord.y][endCoord.x].isMove = true;
+  virtualBoard[startCoord.y][startCoord.x] = null;
+}
+
+function checkMate() {
+  let result = true;
+  const color = moveTurn;
+  const opColor = moveTurn == "white" ? "Чёрных" : "Белых";
+  for (let i = 0; i < 8; i++) {
+    for (let j = 0; j < 8; j++) {
+      if (virtualBoard[i][j]?.color == color) {
+        const eatSquares = searchEatAvailable({ x: j, y: i });
+        const moveSquares = searchMoveAvailable({ x: j, y: i });
+        if (eatSquares.length != 0 || moveSquares.length != 0) {
+          result = false;
+          clearVirtualActionBoard();
+          return result;
+        }
+      }
+    }
+  }
+  // setTimeout(() => {
+  //   turnStatus.textContent = "Мат. Игра окончена.";
+  //   alert(`Игра окончена. Победа ${opColor}`);
+  // }, 100);
+  moveTurn = "game-over";
+  return result;
 }
