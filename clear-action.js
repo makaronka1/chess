@@ -729,7 +729,6 @@ function checkMate(color) {
     turnStatus.textContent = "Мат. Игра окончена.";
     alert(`Игра окончена. Победа ${opColor}`);
   }, 100);
-  return result;
 }
 
 function imageMove(startCoord, endCoord, flag = "move") {
