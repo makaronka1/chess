@@ -135,29 +135,11 @@ function enpassant(targetSquare) {
   }
 }
 
-function turnSwap() {
-  if (moveTurn == "white") {
-    moveTurn = "black";
-    try {
-      document
-        .querySelector(".enpassant-black")
-        .classList.remove("enpassant-black");
-    } catch {
-      console.log("Взятия на проходе нет.");
-    }
-    turnStatus.textContent = "Ход черных";
-    clearVirtualActionBoard();
-  } else {
-    moveTurn = "white";
-    try {
-      document
-        .querySelector(".enpassant-white")
-        .classList.remove("enpassant-white");
-    } catch {
-      console.log("Взятия на проходе нет.");
-    }
+function turnSwap(color) {
+  if (color == "WHITE") {
     turnStatus.textContent = "Ход белых";
-    clearVirtualActionBoard();
+  } else {
+    turnStatus.textContent = "Ход черных";
   }
 }
 
