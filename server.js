@@ -62,10 +62,10 @@ let virtualActionBoard = Array(8)
   .map(() => Array(8).fill(null));
 
 function fillVirtualBoard() {
-  //fillBishop();
-  //fillHorse();
+  fillBishop();
+  fillHorse();
   fillKing();
-  //fillPawn();
+  fillPawn();
   fillQueen();
   fillRook();
 }
@@ -145,7 +145,7 @@ fillVirtualBoard();
 //   }
 // });
 
-server.listen(3000, () => {
+server.listen(3000,'0.0.0.0', () => {
   console.log('Сервер запущен на порту 3000');
 });
 
@@ -209,17 +209,28 @@ wss.on('connection', (ws) => {
           turnSwap();
           if (check()) {
             if(!checkMate()) {
-              ws.send(JSON.stringify({
+              const message = JSON.stringify({
                 type: 'CHECK',
                 data: findKing(moveTurn),
                 color: moveTurn
-              }))
+              });
+
+              wss.clients.forEach(client => {
+                if (client.readyState === WebSocket.OPEN) {
+                  client.send(message);
+                }
+              });
             } else {
-              ws.send(JSON.stringify({
+              const message = JSON.stringify({
                 type: 'CHECKMATE',
                 data: findKing(moveTurn),
                 color: moveTurn
-              }))
+              });
+              wss.clients.forEach(client => {
+                if (client.readyState === WebSocket.OPEN) {
+                  client.send(message);
+                }
+              });
             }
           }
         }
@@ -247,17 +258,28 @@ wss.on('connection', (ws) => {
           turnSwap();
           if (check()) {
             if(!checkMate()) {
-              ws.send(JSON.stringify({
+              const message = JSON.stringify({
                 type: 'CHECK',
                 data: findKing(moveTurn),
                 color: moveTurn
-              }))
+              });
+
+              wss.clients.forEach(client => {
+                if (client.readyState === WebSocket.OPEN) {
+                  client.send(message);
+                }
+              });
             } else {
-              ws.send(JSON.stringify({
+              const message = JSON.stringify({
                 type: 'CHECKMATE',
                 data: findKing(moveTurn),
                 color: moveTurn
-              }))
+              });
+              wss.clients.forEach(client => {
+                if (client.readyState === WebSocket.OPEN) {
+                  client.send(message);
+                }
+              });
             }
           }
         }
