@@ -62,88 +62,14 @@ let virtualActionBoard = Array(8)
   .map(() => Array(8).fill(null));
 
 function fillVirtualBoard() {
-  fillBishop();
-  fillHorse();
+  //fillBishop();
+  //fillHorse();
   fillKing();
-  fillPawn();
+  //fillPawn();
   fillQueen();
   fillRook();
 }
 fillVirtualBoard();
-
-
-// const server = http.createServer((req, res) => {
-//   if (req.url === "/board") {
-//     // Возвращаем virtualBoard в формате JSON
-//     res.statusCode = 200;
-//     res.setHeader("Content-Type", "application/json");
-//     res.setHeader("Access-Control-Allow-Origin", "*"); // Для кросс-доменных запросов
-//     res.end(JSON.stringify(virtualBoard));
-//   } else if (req.url.startsWith("/square")) {
-//     const urlParams = new URL(req.url, `http://${req.headers.host}`);
-//     const x = parseInt(urlParams.searchParams.get("x"));
-//     const y = parseInt(urlParams.searchParams.get("y"));
-//     const coordObject = { x: x, y: y };
-//     if (virtualBoard[y][x] && virtualBoard[y][x].color == moveTurn) {
-//       const figure = virtualBoard[y][x];
-//       let resultMassive = [];
-//       let castlingSquares = [];
-//       clearVirtualActionBoard();
-//       selectedFigureSquare = coordObject;
-//       const moveSquares = searchMoveAvailable(coordObject);
-//       const eatSquares = searchEatAvailable(coordObject);
-//       if (figure.type == "king") {
-//         castlingSquares = isCastling(coordObject);
-//       }
-//       resultMassive = [coordObject, moveSquares, eatSquares, castlingSquares];
-//       res.statusCode = 200;
-//       res.setHeader("Content-Type", "application/json");
-//       res.setHeader("Access-Control-Allow-Origin", "*");
-//       res.end(JSON.stringify(resultMassive));
-//     } // else {
-//     //   res.statusCode = 200;
-//     //   selectedFigureSquare = null;
-//     //   res.setHeader("Content-Type", "application/json");
-//     //   res.setHeader("Access-Control-Allow-Origin", "*");
-//     //   res.end(JSON.stringify("void square или не цвет хода"));
-//     // }
-//     if (
-//       virtualBoard[y][x] == null &&
-//       virtualActionBoard[y][x] == "canMove" &&
-//       selectedFigureSquare
-//     ) {
-//       figureMove(selectedFigureSquare, coordObject);
-//       //Трансформация пешки
-//       /*if (
-//         (squareInfo(square).y == 7 || squareInfo(square).y == 0) &&
-//         virtualBoard[selectedFigureSquare.y][selectedFigureSquare.x].type ==
-//           "pawn"
-//       ) {
-//         selectedTransformFigure = squareInfo(square);
-//         showModal();
-//         virtualBoard[selectedFigureSquare.y][selectedFigureSquare.x] = null;
-//       }*/
-//       virtualBoard[selectedFigureSquare.y][selectedFigureSquare.x] = null;
-//       clearVirtualActionBoard();
-//       res.statusCode = 200;
-//       selectedFigureSquare = null;
-//       res.setHeader("Content-Type", "application/json");
-//       res.setHeader("Access-Control-Allow-Origin", "*");
-//       res.end(JSON.stringify("ход"));
-//       // turnSwap();
-//       // if (check()) {
-//       //   checkMate();
-//       // }
-//     }
-//   } else {
-//     // Стандартный ответ для других URL
-//     res.statusCode = 200;
-//     res.setHeader("Content-Type", "text/plain");
-//     res.end(
-//       "Привет, это мой локальный сервер на Node.js! Для получения доски перейдите на /board"
-//     );
-//   }
-// });
 
 server.listen(3000,'0.0.0.0', () => {
   console.log('Сервер запущен на порту 3000');
@@ -158,17 +84,29 @@ wss.on('connection', (ws) => {
   if (moveTurn == "white") {
     moveTurn = "black";
     clearVirtualActionBoard();
-    ws.send(JSON.stringify({
+    const message = 
+    JSON.stringify({
       type: 'TURN',
       data: "BLACK"
-    }))
+    });
+    wss.clients.forEach(client => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(message);
+      }
+    });
   } else {
-    moveTurn = "white";
-    clearVirtualActionBoard();
-    ws.send(JSON.stringify({
+    const message = 
+    JSON.stringify({
       type: 'TURN',
       data: "WHITE"
-    }))
+    });
+    moveTurn = "white";
+    clearVirtualActionBoard();
+    wss.clients.forEach(client => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(message);
+      }
+    });
   }
   }
 
@@ -899,10 +837,6 @@ function checkMate() {
       }
     }
   }
-  // setTimeout(() => {
-  //   turnStatus.textContent = "Мат. Игра окончена.";
-  //   alert(`Игра окончена. Победа ${opColor}`);
-  // }, 100);
   moveTurn = "game-over";
   return result;
 }
