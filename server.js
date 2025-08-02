@@ -118,7 +118,7 @@ wss.on('connection', (ws) => {
         const x = data.x;
         const y = data.y;
         const coordObject = { x: x, y: y };
-        if (virtualBoard[y][x] && virtualBoard[y][x].color == moveTurn) {
+        if (virtualBoard[y][x] && virtualBoard[y][x].color == moveTurn && virtualActionBoard[y][x] != 'canCastling') {
           const figure = virtualBoard[y][x];
           let resultMassive = [];
           let castlingSquares = [];
@@ -189,6 +189,45 @@ wss.on('connection', (ws) => {
             showModal();
             virtualBoard[selectedFigureSquare.y][selectedFigureSquare.x] = null;
           }*/
+          virtualBoard[selectedFigureSquare.y][selectedFigureSquare.x] = null;
+          clearVirtualActionBoard();
+          selectedFigureSquare = null;
+          broadcastBoardState();
+          turnSwap();
+          if (check()) {
+            if(!checkMate()) {
+              const message = JSON.stringify({
+                type: 'CHECK',
+                data: findKing(moveTurn),
+                color: moveTurn
+              });
+
+              wss.clients.forEach(client => {
+                if (client.readyState === WebSocket.OPEN) {
+                  client.send(message);
+                }
+              });
+            } else {
+              const message = JSON.stringify({
+                type: 'CHECKMATE',
+                data: findKing(moveTurn),
+                color: moveTurn
+              });
+              wss.clients.forEach(client => {
+                if (client.readyState === WebSocket.OPEN) {
+                  client.send(message);
+                }
+              });
+            }
+          }
+        }
+        
+        if (
+          virtualBoard[y][x] != null &&
+          virtualActionBoard[y][x] == "canCastling" &&
+          selectedFigureSquare
+        ) {
+          castling(coordObject);
           virtualBoard[selectedFigureSquare.y][selectedFigureSquare.x] = null;
           clearVirtualActionBoard();
           selectedFigureSquare = null;
@@ -744,6 +783,33 @@ function isCastling(figureCoord) {
   }
 
   return result;
+}
+
+function castling(figureCoord) {
+  const { x, y } = figureCoord;
+  const isLong = x == 0 ? true : false;
+
+  if (isLong) {
+    virtualBoard[y][x].isMove = true;
+    virtualBoard[y][parseInt(x) + 3] = virtualBoard[y][x];
+    virtualBoard[y][x] = null;
+    const kingSquare = findKing(moveTurn);
+    const newKingSquare = { x: kingSquare.x - 2, y: kingSquare.y };
+    virtualBoard[kingSquare.y][kingSquare.x].isMove = true;
+    virtualBoard[newKingSquare.y][newKingSquare.x] =
+    virtualBoard[kingSquare.y][kingSquare.x];
+    virtualBoard[kingSquare.y][kingSquare.x] = null;
+  } else {
+    virtualBoard[y][x].isMove = true;
+    virtualBoard[y][parseInt(x) - 2] = virtualBoard[y][x];
+    virtualBoard[y][x] = null;
+    const kingSquare = findKing(moveTurn);
+    const newKingSquare = { x: kingSquare.x + 2, y: kingSquare.y };
+    virtualBoard[kingSquare.y][kingSquare.x].isMove = true;
+    virtualBoard[newKingSquare.y][newKingSquare.x] =
+    virtualBoard[kingSquare.y][kingSquare.x];
+    virtualBoard[kingSquare.y][kingSquare.x] = null;
+  }
 }
 
 function createInvisibleClone(figure) {
