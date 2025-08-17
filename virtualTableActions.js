@@ -1,6 +1,24 @@
 console.log(virtualBoard);
 const socket = new WebSocket('ws://localhost:3000');
-function findVirtualBoardSquare(square) {}
+
+function generateId() {
+  if(!localStorage.getItem('id')){
+    let id = Math.floor(Math.random() * 10000);
+    localStorage.setItem('id', id);
+    console.log(localStorage.getItem('id'));
+  } else {
+    console.log(localStorage.getItem('id'));
+  };
+  const response = JSON.stringify(
+    {type: "SET_ID",
+    data: localStorage.getItem('id')}
+  );
+  setTimeout( () => {
+    socket.send(response);
+  }, 1000);
+}
+
+generateId();
 
 function targetCell(event) {
   let square;
