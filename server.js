@@ -6,6 +6,7 @@ const app = express();
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
+let whitePlayerId, blackPlayerId;
 // Middleware
 app.use(express.static('public'));
 app.use(express.json());
@@ -113,12 +114,13 @@ wss.on('connection', (ws) => {
   ws.on('message', (message) => {
     //console.log(message);
     try {
-      const { type, data } = JSON.parse(message);
+      const { type, data, player_id } = JSON.parse(message);
       if (type == 'SQUARE') {
+        const currentPlayerId  = moveTurn == 'black' ?  blackPlayerId : whitePlayerId;
         const x = data.x;
         const y = data.y;
         const coordObject = { x: x, y: y };
-        if (virtualBoard[y][x] && virtualBoard[y][x].color == moveTurn && virtualActionBoard[y][x] != 'canCastling') {
+        if (virtualBoard[y][x] && virtualBoard[y][x].color == moveTurn && virtualActionBoard[y][x] != 'canCastling' && currentPlayerId == player_id) {
           const figure = virtualBoard[y][x];
           let resultMassive = [];
           let castlingSquares = [];
@@ -139,7 +141,7 @@ wss.on('connection', (ws) => {
         if (
           virtualBoard[y][x] !== null &&
           virtualActionBoard[y][x] == "canEat" &&
-          selectedFigureSquare
+          selectedFigureSquare && currentPlayerId == player_id
         ) {
           figureEat(selectedFigureSquare, coordObject);
           clearVirtualActionBoard();
@@ -176,7 +178,7 @@ wss.on('connection', (ws) => {
         if (
           virtualBoard[y][x] == null &&
           virtualActionBoard[y][x] == "canMove" &&
-          selectedFigureSquare
+          selectedFigureSquare && currentPlayerId == player_id
         ) {
           figureMove(selectedFigureSquare, coordObject);
           //Трансформация пешки
@@ -225,7 +227,7 @@ wss.on('connection', (ws) => {
         if (
           virtualBoard[y][x] != null &&
           virtualActionBoard[y][x] == "canCastling" &&
-          selectedFigureSquare
+          selectedFigureSquare && currentPlayerId == player_id
         ) {
           castling(coordObject);
           virtualBoard[selectedFigureSquare.y][selectedFigureSquare.x] = null;
@@ -272,6 +274,18 @@ wss.on('connection', (ws) => {
             type: "BOARD",
             data: virtualBoard
           }))
+      }
+
+      if (type === 'SET_ID') {
+        if (!whitePlayerId) {
+          whitePlayerId = data;
+          console.log(whitePlayerId);
+        } else if (!blackPlayerId) {
+          blackPlayerId = data;
+          console.log(blackPlayerId);
+        } else {
+          console.log('места заняты');
+        }
       }
     } catch (e) {
       console.error('Ошибка обработки сообщения:', e);
